@@ -1,0 +1,12 @@
+main: com.mullen.ethan.dungeonrunner.Main
+name: DungeonRunner
+version: 0.1
+commands:
+  dungeon:
+  dungeonworld:
+    aliases: [dw]  
+libraries:
+  - com.github.shynixn.structureblocklib:structureblocklib-bukkit-api:2.10.0
+  - com.github.shynixn.structureblocklib:structureblocklib-bukkit-core:2.10.0
+api-version: 1.19
+depend: [NBTAPI, CustomBosses]
