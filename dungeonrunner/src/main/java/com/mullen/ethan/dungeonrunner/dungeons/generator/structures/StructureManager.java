@@ -1,4 +1,4 @@
-package com.mullen.ethan.dungeonrunner.dungeons.structures;
+package com.mullen.ethan.dungeonrunner.dungeons.generator.structures;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 
 import com.github.shynixn.structureblocklib.api.bukkit.StructureBlockLibApi;
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
@@ -69,7 +70,7 @@ public class StructureManager {
 						boolean isReadableSign = b.getType() == Material.OAK_SIGN && (b.getState() instanceof Sign);
 						if(!isReadableSign) continue;
 						Sign s = (Sign) b.getState();
-						if(s.getLine(0).equalsIgnoreCase("door")) {
+						if(s.getSide(Side.FRONT).getLine(0).equalsIgnoreCase("door")) {
 							processedData.get(name).addDoorLocation(offset);
 						}
 					}

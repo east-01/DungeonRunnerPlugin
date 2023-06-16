@@ -13,7 +13,7 @@ import org.bukkit.block.BlockFace;
 
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
 import com.mullen.ethan.dungeonrunner.Main;
-import com.mullen.ethan.dungeonrunner.dungeons.structures.StructureManager;
+import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureManager;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Utils;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;

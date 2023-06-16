@@ -7,18 +7,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.RespawnAnchor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.inventory.Inventory;
 
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
@@ -58,34 +55,33 @@ public class CraftingAnchor implements Listener {
 		main.setCurrentDungeon(dungeon);
 		
 	}
-	
-	@EventHandler(priority = EventPriority.LOW)
-	public void playerInteractEvent(PlayerInteractEvent event) {
-		
-		if(event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-		Block b = event.getClickedBlock();
-		if(b.getType() != Material.RESPAWN_ANCHOR) return;
-		Player p = event.getPlayer();
-		if(!room.isPlayerInRoom(p)) return;
 
-		event.setCancelled(true);
-
-		if(event.getPlayer().getEquipment().getItemInMainHand().getType() == Material.FLINT_AND_STEEL ||
-				event.getPlayer().getEquipment().getItemInMainHand().getType() == Material.FIRE_CHARGE) return;
-		if(main.getCurrentDungeon() != null) {
-			p.sendMessage(ChatColor.RED + "You can't craft a new dungeon until the existing one is closed...");
-			return;
-		}
-		
-		Block blockBelow = b.getLocation().clone().add(0, -1, 0).getBlock();
-		if(blockBelow.getType() != Material.BARREL) return;
-		Barrel barrel = (Barrel) blockBelow.getState();
-		barrel.setCustomName(ChatColor.AQUA + "Dungeon crafter");
-		barrel.update();
-		Inventory inv = barrel.getInventory();
-		p.openInventory(inv);
-		
-	}
+// TODO: The dungeon crafting feature is disabled for now
+//	@EventHandler(priority = EventPriority.LOW)
+//	public void playerInteractEvent(PlayerInteractEvent event) {
+//		
+//		if(event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+//		Block b = event.getClickedBlock();
+//		if(b.getType() != Material.RESPAWN_ANCHOR) return;
+//		Player p = event.getPlayer();
+//		if(!room.isPlayerInRoom(p)) return;
+//
+//		event.setCancelled(true);
+//
+//		if(main.getCurrentDungeon() != null) {
+//			p.sendMessage(ChatColor.RED + "You can't craft a new dungeon until the existing one is closed...");
+//			return;
+//		}
+//		
+//		Block blockBelow = b.getLocation().clone().add(0, -1, 0).getBlock();
+//		if(blockBelow.getType() != Material.BARREL) return;
+//		Barrel barrel = (Barrel) blockBelow.getState();
+//		barrel.setCustomName(ChatColor.AQUA + "Dungeon crafter");
+//		barrel.update();
+//		Inventory inv = barrel.getInventory();
+//		p.openInventory(inv);
+//		
+//	}
 		
 	@EventHandler
 	public void buttonInteractEvent(PlayerInteractEvent event) {

@@ -21,6 +21,10 @@ import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonTheme;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.GeneratorSettings;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTable;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonLifecycleManager;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonMobManager;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonPlayerManager;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.RoomManager;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
 public class Dungeon {
@@ -29,6 +33,8 @@ public class Dungeon {
 
 	private GeneratorSettings settings;
 	private DungeonGenerator dungeonGenerator;
+	
+	private DungeonLifecycleManager dungeonLifecycleManager;
 	private DungeonPlayerManager dungeonPlayerManager;
 	private DungeonMobManager dungeonMobManager;
 	private List<RoomManager> roomManagers;
@@ -41,6 +47,8 @@ public class Dungeon {
 		
 		this.settings = settings;
 		this.dungeonGenerator = new DungeonGenerator(instance, settings, dungeonCompleteRunnable);
+
+		this.dungeonLifecycleManager = new DungeonLifecycleManager(instance, this);
 		this.dungeonPlayerManager = new DungeonPlayerManager(instance, this);
 		this.dungeonMobManager = new DungeonMobManager(instance, this);
 		this.roomManagers = new ArrayList<RoomManager>();
@@ -88,6 +96,7 @@ public class Dungeon {
 		dungeonMobManager.clearMobs();
 		
 		// Make sure to unregister from events
+		HandlerList.unregisterAll(dungeonLifecycleManager);
 		HandlerList.unregisterAll(dungeonPlayerManager);
 		HandlerList.unregisterAll(dungeonMobManager);
 		for(RoomManager rm : roomManagers) {
@@ -123,7 +132,7 @@ public class Dungeon {
 			inv.setItem(i, item);
 		}
 	}
-	
+		
 	// Wrappers so that other classes can access Manager classes from the Dungeon class
 	public List<Player> getPlayersInDungeon() { return dungeonPlayerManager.players(); }
 	public void addPlayer(Player p) { dungeonPlayerManager.addPlayer(p); }

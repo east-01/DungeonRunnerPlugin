@@ -1,4 +1,4 @@
-package com.mullen.ethan.dungeonrunner.dungeons;
+package com.mullen.ethan.dungeonrunner.dungeons.managers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +8,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import com.mullen.ethan.custombosses.events.CustomBossMobSpawnEvent;
+import com.mullen.ethan.custommobs.events.CustomMobSpawnEvent;
 import com.mullen.ethan.dungeonrunner.Main;
+import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 
 public class DungeonMobManager implements Listener {
 
@@ -54,13 +55,13 @@ public class DungeonMobManager implements Listener {
 	}
 	
 	@EventHandler
-	public void onCustomBossMobSpawn(CustomBossMobSpawnEvent event) {
+	public void onCustomBossMobSpawn(CustomMobSpawnEvent event) {
 		if(!event.getSpawnLocation().getWorld().getName().equals(DungeonWorldManager.DUNGEON_WORLD_NAME)) return;
 		if(event.isBoss()) {
 			this.bossSpawned = true;
-			this.boss = event.getCustomMob();
+			this.boss = event.getEntity();
 		}
-		addMob(event.getCustomMob());
+		addMob(event.getEntity());
 	}
 		
 }

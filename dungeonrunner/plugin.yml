@@ -6,7 +6,7 @@ commands:
   dungeonworld:
     aliases: [dw]  
 libraries:
-  - com.github.shynixn.structureblocklib:structureblocklib-bukkit-api:2.10.0
-  - com.github.shynixn.structureblocklib:structureblocklib-bukkit-core:2.10.0
+  - com.github.shynixn.structureblocklib:structureblocklib-bukkit-api:2.11.0
+  - com.github.shynixn.structureblocklib:structureblocklib-bukkit-core:2.11.0
 api-version: 1.19
-depend: [NBTAPI, CustomBosses]
+depend: [NBTAPI, CustomMobs]

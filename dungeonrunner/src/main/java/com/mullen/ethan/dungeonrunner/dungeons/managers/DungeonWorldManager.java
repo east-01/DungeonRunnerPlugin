@@ -1,4 +1,4 @@
-package com.mullen.ethan.dungeonrunner.dungeons;
+package com.mullen.ethan.dungeonrunner.dungeons.managers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -55,6 +55,7 @@ public class DungeonWorldManager {
 	    world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
 	    world.setGameRule(GameRule.DO_FIRE_TICK, false);
 	    world.setGameRule(GameRule.MOB_GRIEFING, false);
+	    world.setGameRule(GameRule.DO_MOB_LOOT, false);
 	    return world;
 	}
 

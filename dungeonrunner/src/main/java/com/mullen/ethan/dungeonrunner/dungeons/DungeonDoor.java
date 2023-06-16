@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.mullen.ethan.dungeonrunner.Main;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonWorldManager;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 

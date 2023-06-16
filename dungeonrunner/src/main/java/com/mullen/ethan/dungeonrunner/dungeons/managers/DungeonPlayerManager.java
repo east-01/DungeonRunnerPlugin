@@ -1,4 +1,4 @@
-package com.mullen.ethan.dungeonrunner.dungeons;
+package com.mullen.ethan.dungeonrunner.dungeons.managers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 import com.mullen.ethan.dungeonrunner.Main;
+import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 
 /**
  * Class responsible for managing players in the dungeon

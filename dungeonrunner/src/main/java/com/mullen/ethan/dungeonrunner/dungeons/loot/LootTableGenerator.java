@@ -1,7 +1,11 @@
 package com.mullen.ethan.dungeonrunner.dungeons.loot;
 
+import java.util.Random;
+
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
@@ -49,5 +53,13 @@ public class LootTableGenerator {
 		meta.setBasePotionData(new PotionData(type));
 		splashPotion.setItemMeta(meta);
 		return splashPotion;
+	}
+	public static ItemStack getRandomMaxEnchantBook() {
+		ItemStack item = new ItemStack(Material.ENCHANTED_BOOK);
+		ItemMeta meta = item.getItemMeta();
+		Enchantment ench = Enchantment.values()[new Random().nextInt(Enchantment.values().length)];
+		meta.addEnchant(ench, ench.getMaxLevel(), false);
+		item.setItemMeta(meta);
+		return item;
 	}
 }

@@ -10,7 +10,7 @@ import org.bukkit.block.BlockFace;
 
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
 import com.mullen.ethan.dungeonrunner.Main;
-import com.mullen.ethan.dungeonrunner.dungeons.structures.StructureData;
+import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureData;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Utils;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
@@ -158,9 +158,15 @@ public class RoomData implements Cloneable {
 	
 	public Vector3 getDesireableSpawnLocation(int height) {
 		Cube roomCube = getCube();
-		int spawnX = roomCube.getStartX() + rand.nextInt(roomCube.getEndX()-roomCube.getStartX());
-		int spawnZ = roomCube.getStartZ() + rand.nextInt(roomCube.getEndZ()-roomCube.getStartZ());
-		return getDesireableSpawnLocation(height, spawnX, spawnZ);
+		for(int attempt = 0; attempt < 300; attempt++) {
+			int spawnX = roomCube.getStartX() + rand.nextInt(roomCube.getEndX()-roomCube.getStartX());
+			int spawnZ = roomCube.getStartZ() + rand.nextInt(roomCube.getEndZ()-roomCube.getStartZ());
+			Vector3 spawnLoc = getDesireableSpawnLocation(height, spawnX, spawnZ);
+			if(spawnLoc != null) {
+				return spawnLoc.add(new Vector3(0.5f, 0.1f, 0.5f));
+			}
+		}
+		return null;
 	}
 	
 	public Vector3 getDesireableSpawnLocation(int height, float worldX, float worldZ) {
@@ -171,9 +177,21 @@ public class RoomData implements Cloneable {
 			Cube zombieSpace = new Cube(new Vector3(worldX, spawnY, worldZ), new Vector3(worldX, spawnY+height, worldZ));
 			zombieSpace.setWorld(main.getDungeonWorld());
 			// If the space is empty and the block below is solid
-			if(zombieSpace.isEmpty() && new Vector3(worldX, spawnY-1, worldZ).getWorldLocation(main.getDungeonWorld()).getBlock().getType() != Material.AIR) {
-				return new Vector3(worldX, spawnY, worldZ);
+			boolean isValidSpot = zombieSpace.isEmpty() && new Vector3(worldX, spawnY-1, worldZ).getWorldLocation(main.getDungeonWorld()).getBlock().getType() != Material.AIR;
+			if(!isValidSpot) continue;
+			
+			boolean hasCeiling = false;
+			for(int yOffset = 0; yOffset <= roomCube.getEndY()-spawnY; yOffset++) {
+				boolean isSolidBlock = new Vector3(worldX, spawnY+yOffset, worldZ).getWorldLocation(main.getDungeonWorld()).getBlock().getType() != Material.AIR;
+				if(isSolidBlock) {
+					hasCeiling = true;
+					break;
+				}
 			}
+			if(!hasCeiling) continue;
+			
+			return new Vector3(worldX, spawnY, worldZ);
+			
 		}
 		return null;
 	}

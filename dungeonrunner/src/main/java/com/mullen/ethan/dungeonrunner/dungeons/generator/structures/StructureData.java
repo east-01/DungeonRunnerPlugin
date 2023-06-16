@@ -1,4 +1,4 @@
-package com.mullen.ethan.dungeonrunner.dungeons.structures;
+package com.mullen.ethan.dungeonrunner.dungeons.generator.structures;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +11,10 @@ public class StructureData {
 	private Vector3 size;
 	private List<Vector3> doorLocations;
 	private List<Vector3> chestLocations;
+	private StructureType structureType;
 
 	public StructureData(String name, Vector3 size, List<Vector3> doorLocations, List<Vector3> chestLocations) {
-		this.name = name;
+		setName(name);
 		this.size = size;
 		this.doorLocations = doorLocations;
 		this.chestLocations = chestLocations;
@@ -41,6 +42,19 @@ public class StructureData {
 
 	public void setName(String name) {
 		this.name = name;
+		// Infer structure type from name
+		this.structureType = null;
+		if(name.toLowerCase().contains("small_room")) {
+			this.structureType = StructureType.SMALL_ROOM;
+		} else if(name.toLowerCase().contains("large_room")) {
+			this.structureType = StructureType.LARGE_ROOM;
+		} else if(name.toLowerCase().contains("boss_room")) {
+			this.structureType = StructureType.BOSS_ROOM;
+		} else if(name.toLowerCase().contains("start_room")) {
+			this.structureType = StructureType.START_ROOM;
+		} else if(name.toLowerCase().contains("hallway")) {
+			this.structureType = StructureType.HALLWAY;
+		}
 	}
 	
 	public Vector3 getSize() {
@@ -85,6 +99,10 @@ public class StructureData {
 
 	public void addChestLocation(Vector3 offset) {
 		chestLocations.add(offset);
+	}
+	
+	public StructureType getStructureType() {
+		return structureType;
 	}
 	
 }

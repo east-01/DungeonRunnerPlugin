@@ -1,4 +1,4 @@
-package com.mullen.ethan.dungeonrunner.dungeons;
+package com.mullen.ethan.dungeonrunner.commands;
 
 import java.util.Random;
 
@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.mullen.ethan.dungeonrunner.Main;
+import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonTheme;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.GeneratorSettings;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
@@ -145,6 +146,9 @@ public class DungeonCommands implements CommandExecutor {
 			}
 			Player p = (Player) sender;
 			MusicBox.LARGE_WIN.playSong(main, p.getLocation(), 1);
+		} else {
+			sender.sendMessage(ChatColor.RED + "Failed to parse command.");
+			return true;
 		}
 		return false;
 	}

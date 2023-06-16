@@ -11,16 +11,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.mullen.ethan.custombosses.CustomBosses;
+import com.mullen.ethan.custommobs.CustomMobs;
+import com.mullen.ethan.dungeonrunner.commands.DungeonCommands;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
-import com.mullen.ethan.dungeonrunner.dungeons.DungeonCommands;
-import com.mullen.ethan.dungeonrunner.dungeons.DungeonWorldManager;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTable;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonWorldManager;
 import com.mullen.ethan.dungeonrunner.startwell.QueueRoom;
 import com.mullen.ethan.dungeonrunner.startwell.StartWell;
-
-
 
 /*
  * - You jump into the well to get into the dungeon start room, in this room is a single portal which will get you into the dungeons
@@ -37,7 +35,7 @@ public class Main extends JavaPlugin {
 	
 	private Dungeon currentDungeon;
 	
-	private CustomBosses customBosses;
+	private CustomMobs customBosses;
 	private LootTable[] lootTables;
 	
 	private QueueRoom queueRoom;
@@ -55,7 +53,7 @@ public class Main extends JavaPlugin {
 		this.queueRoom = new QueueRoom(this);
 		this.startingWell = new StartWell(this);
 		
-		this.customBosses = (CustomBosses) getServer().getPluginManager().getPlugin("CustomBosses");
+		this.customBosses = (CustomMobs) getServer().getPluginManager().getPlugin("CustomMobs");
 		
 	}
 
@@ -104,7 +102,7 @@ public class Main extends JavaPlugin {
 		this.currentDungeon = newDungeon;
 	}
 	
-	public CustomBosses getCustomBosses() {
+	public CustomMobs getCustomBosses() {
 		return customBosses;
 	}
 	

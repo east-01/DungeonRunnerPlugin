@@ -1,6 +1,7 @@
-package com.mullen.ethan.dungeonrunner.dungeons;
+package com.mullen.ethan.dungeonrunner.dungeons.managers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -11,15 +12,18 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.mullen.ethan.custombosses.bosstypes.BossType;
-import com.mullen.ethan.custombosses.bosstypes.CustomBoss;
+import com.mullen.ethan.custommobs.CustomBoss;
+import com.mullen.ethan.custommobs.includedmobs.IncludedMobsRegister;
 import com.mullen.ethan.dungeonrunner.Main;
+import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
+import com.mullen.ethan.dungeonrunner.dungeons.DungeonDoor;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
+import com.mullen.ethan.dungeonrunner.events.DungeonRoomClearEvent;
+import com.mullen.ethan.dungeonrunner.hordes.DungeonHordes;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
-import com.mullen.ethan.dungeonrunner.utils.MusicBox;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
 public class RoomManager {
@@ -85,46 +89,37 @@ public class RoomManager {
 			roomsMobs.removeAll(toRemove);
 			// Room cleared, do something
 			if(roomsMobs.size() == 0) {
-				MusicBox.SMALL_WIN.playSong(main, room.getCube().getCenter().getWorldLocation(main.getDungeonWorld()), 1f);
-				for(DungeonDoor childDoor : roomsDoors) {
-					childDoor.setLocked(false);
-				}
+				DungeonRoomClearEvent event = new DungeonRoomClearEvent(this);
+				Bukkit.getPluginManager().callEvent(event);
 			}
 		}
 		
 	}
 	
 	public void populate() {
-		Random rand = new Random();
 		this.roomPopulated = true;
 		this.roomsMobs = new ArrayList<Entity>();
-		if(room.getChestLocations().size() > 0) {			
-			// Spawn mobs
-			int spawnCount = 3+rand.nextInt(5);
-			for(int i = 0; i < spawnCount && spawnCount < 100; i++) {
-				Vector3 spawnLoc = room.getDesireableSpawnLocation(2); // 2 is mob height
-				// Means we couldn't find a locatio, add 1 to try again
-				if(spawnLoc == null) {
-					spawnCount++;
-					continue;
-				}
-				float spawnX = spawnLoc.x;
-				float spawnY = spawnLoc.y;
-				float spawnZ = spawnLoc.z;
-				Entity e = main.getDungeonWorld().spawnEntity(new Vector3(spawnX + 0.5f, spawnY, spawnZ + 0.5f).getWorldLocation(main.getDungeonWorld()), EntityType.ZOMBIE);
-				roomsMobs.add(e);
-			}
-			// Lock doors
-			for(DungeonDoor childDoor : roomsDoors) {
-				childDoor.setLocked(true);
-			}
+		if(room.getChestLocations().size() <= 0) return;	
+		
+		DungeonHordes.populateRoom(main, this);
+		
+		// Lock doors
+		for(DungeonDoor childDoor : roomsDoors) {
+			childDoor.setLocked(true);
 		}
 	}
 	
 	public void spawnBoss() {
 		this.roomPopulated = true;
-		BossType bossType = BossType.values()[new Random().nextInt(BossType.values().length)];
-		CustomBoss cb = bossType.getBossClass(main.getCustomBosses());
+		this.roomsMobs = new ArrayList<Entity>();
+		List<String> bosses = Arrays.asList(IncludedMobsRegister.CM_EXALTED_BLAZE, 
+				IncludedMobsRegister.CM_EXALTED_WITHER_SKELETON, 
+				IncludedMobsRegister.CM_EXALTED_ZOMBIE, 
+				IncludedMobsRegister.CM_EXALTED_VINDICATOR, 
+				IncludedMobsRegister.CM_EXALTED_MAGMA_CUBE);
+		
+		String id = bosses.get(new Random().nextInt(bosses.size()));		
+		CustomBoss cb = (CustomBoss) main.getCustomBosses().getInstance(id);
 		Cube roomCube = room.getCube();
 		Vector3 spawnLoc = room.getDesireableSpawnLocation(3,  roomCube.getCenter().x, roomCube.getCenter().z);
 		// Means we couldn't find a locatio, add 1 to try again
@@ -138,11 +133,21 @@ public class RoomManager {
 			p.playSound(spawnWorldLoc, Sound.ENTITY_WITHER_SPAWN, (float)0.8, (float)0.35);
 		}
 		
-		cb.spawn(spawnWorldLoc);
+		LivingEntity boss = cb.spawn(spawnWorldLoc);
+		addMob(boss);
+		
+	}
+		
+	public RoomData getRoomData() {
+		return room;
 	}
 	
 	public List<DungeonDoor> getRoomsDoors() {
 		return roomsDoors;
+	}
+	
+	public void addMob(LivingEntity entity) {
+		roomsMobs.add(entity);
 	}
 	
 }

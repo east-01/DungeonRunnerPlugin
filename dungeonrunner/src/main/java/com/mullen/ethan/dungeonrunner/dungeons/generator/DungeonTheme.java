@@ -20,7 +20,7 @@ public enum DungeonTheme {
 		List<String> l = new ArrayList<>();
 		switch(this) {
 		case CAVE:
-			l.add("cave_start");
+			l.add("cave_start_room");
 			break;
 		case TEST:
 			l.add("stone_start");
@@ -34,18 +34,18 @@ public enum DungeonTheme {
 		List<String> l = new ArrayList<>();
 		switch(this) {
 		case CAVE:
-			l.add("cave_room_1");
-			l.add("cave_room_2");
-			l.add("cave_room_3");
-			l.add("cave_room_4");
-			l.add("cave_bigroom_1");
-			l.add("cave_bigroom_2");
-			l.add("cave_bigroom_3");
-			l.add("cave_bigroom_4");
-			l.add("cave_hub");
-			l.add("cave_hub_2");
-			l.add("cave_hall");
-			l.add("cave_intersection");
+			l.add("cave_small_room_1");
+			l.add("cave_small_room_2");
+			l.add("cave_small_room_3");
+			l.add("cave_small_room_4");
+			l.add("cave_large_room_1");
+			l.add("cave_large_room_2");
+			l.add("cave_large_room_3");
+			l.add("cave_large_room_4");
+			l.add("cave_hallway_hub_1");
+			l.add("cave_hallway_hub_2");
+			l.add("cave_hallway_1");
+			l.add("cave_hallway_intersection");
 			break;
 		case TEST:
 			l.add("stone_room");
@@ -59,7 +59,7 @@ public enum DungeonTheme {
 		List<String> l = new ArrayList<>();
 		switch(this) {
 		case CAVE:
-			l.add("cave_bossroom");
+			l.add("cave_boss_room");
 			break;
 		case TEST:
 			l.add("stone_bossroom");
