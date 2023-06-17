@@ -14,8 +14,8 @@ import org.bukkit.potion.PotionEffectType;
 import com.mullen.ethan.custommobs.CustomMobs;
 import com.mullen.ethan.dungeonrunner.commands.DungeonCommands;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
-import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTable;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
+import com.mullen.ethan.dungeonrunner.dungeons.loot.TieredLootTable;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonWorldManager;
 import com.mullen.ethan.dungeonrunner.startwell.QueueRoom;
 import com.mullen.ethan.dungeonrunner.startwell.StartWell;
@@ -36,7 +36,7 @@ public class Main extends JavaPlugin {
 	private Dungeon currentDungeon;
 	
 	private CustomMobs customBosses;
-	private LootTable[] lootTables;
+	private TieredLootTable lootTable;
 	
 	private QueueRoom queueRoom;
 	private StartWell startingWell;
@@ -48,7 +48,7 @@ public class Main extends JavaPlugin {
 			
 		getCommand("dungeon").setExecutor(dungeonCommands);
 	
-		this.lootTables = LootTableGenerator.populateLootTables();
+		this.lootTable = LootTableGenerator.getTieredLootTable();
 				
 		this.queueRoom = new QueueRoom(this);
 		this.startingWell = new StartWell(this);
@@ -106,12 +106,12 @@ public class Main extends JavaPlugin {
 		return customBosses;
 	}
 	
-	public LootTable[] getLootTable() {
-		return lootTables;
+	public TieredLootTable getLootTable() {
+		return lootTable;
 	}
 	
-	public void setLootTables(LootTable[] newLootTables) {
-		this.lootTables = newLootTables;
+	public void setLootTables(TieredLootTable newTable) {
+		this.lootTable = newTable;
 	}
 	
 	public StartWell getStartWell() {

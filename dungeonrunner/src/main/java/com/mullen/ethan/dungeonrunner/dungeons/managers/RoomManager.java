@@ -21,6 +21,7 @@ import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 import com.mullen.ethan.dungeonrunner.dungeons.DungeonDoor;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
+import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureType;
 import com.mullen.ethan.dungeonrunner.events.DungeonRoomClearEvent;
 import com.mullen.ethan.dungeonrunner.hordes.DungeonHordes;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
@@ -46,12 +47,17 @@ public class RoomManager {
 		this.roomsDoors = new ArrayList<DungeonDoor>();
 		
 		// Create DungeonDoors
-		for(Vector3 childDoor : room.getChildrenMap().values()) {
+		for(RoomData child : room.getChildrenMap().keySet()) {
+			Vector3 childDoor = room.getChildrenMap().get(child);
 			Location doorLoc = room.getLocation().clone().add(childDoor).getWorldLocation(main.getDungeonWorld());
 			BlockFace exitDir = room.getDoorExitDirection(childDoor);
 			boolean isWest = exitDir == BlockFace.NORTH || exitDir == BlockFace.SOUTH;
-			DungeonDoor door = new DungeonDoor(main, doorLoc, isWest);
+			boolean isBossDoor = child.getStructureData().getStructureType() == StructureType.BOSS_ROOM;
+			DungeonDoor door = new DungeonDoor(main, doorLoc, isWest, isBossDoor);
 			roomsDoors.add(door);
+			if(isBossDoor) {
+				dungeon.setBossDoor(door);
+			}
 		}
 		
 		taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(main, new Runnable() {
@@ -70,11 +76,7 @@ public class RoomManager {
 			for(Player p : dungeon.getPlayersInDungeon()) {
 				Location loc = p.getLocation();
 				if(cube.contains((float)loc.getX(), (float)loc.getY(), (float)loc.getZ())) {
-					if(room.getStructureData().getName().toLowerCase().contains("boss")) {
-						spawnBoss();
-					} else {
-						populate();
-					}
+					populate();
 				}
 				break;
 			}		
@@ -99,19 +101,21 @@ public class RoomManager {
 	public void populate() {
 		this.roomPopulated = true;
 		this.roomsMobs = new ArrayList<Entity>();
-		if(room.getChestLocations().size() <= 0) return;	
-		
-		DungeonHordes.populateRoom(main, this);
-		
-		// Lock doors
-		for(DungeonDoor childDoor : roomsDoors) {
-			childDoor.setLocked(true);
+						
+		if(room.getStructureData().getStructureType() == StructureType.BOSS_ROOM) {
+			spawnBoss();
+		} else if(isMobRoom()) {
+			Location centerRoom = room.getCube().getCenter().getWorldLocation(main.getDungeonWorld());
+			centerRoom.getWorld().playSound(centerRoom, Sound.BLOCK_CHEST_LOCKED, 1, 1.5f);
+			dungeon.sendActionBarMessage(ChatColor.RED + "" + ChatColor.ITALIC + "Room locked!");
+			DungeonHordes.populateRoom(main, this);
+			// Lock doors
+			lockDoors();
 		}
+
 	}
 	
 	public void spawnBoss() {
-		this.roomPopulated = true;
-		this.roomsMobs = new ArrayList<Entity>();
 		List<String> bosses = Arrays.asList(IncludedMobsRegister.CM_EXALTED_BLAZE, 
 				IncludedMobsRegister.CM_EXALTED_WITHER_SKELETON, 
 				IncludedMobsRegister.CM_EXALTED_ZOMBIE, 
@@ -137,7 +141,24 @@ public class RoomManager {
 		addMob(boss);
 		
 	}
-		
+	
+	public void lockDoors() {
+		for(DungeonDoor childDoor : roomsDoors) {
+			childDoor.setLocked(true);
+		}
+	}
+	
+	public void unlockDoors() {
+		for(DungeonDoor childDoor : roomsDoors) {
+			if(childDoor == dungeon.getBossDoor()) continue;
+			childDoor.setLocked(false);
+		}
+	}
+	
+	public boolean isMobRoom() {
+		return room.getChestLocations().size() > 0;
+	}
+	
 	public RoomData getRoomData() {
 		return room;
 	}

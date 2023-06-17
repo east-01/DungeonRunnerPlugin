@@ -9,10 +9,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
+
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 
 /**
  * Class responsible for managing players in the dungeon
@@ -48,6 +52,8 @@ public class DungeonPlayerManager implements Listener {
 		} else {
 			p.sendMessage(ChatColor.AQUA + "You left the dungeon.");
 		}
+
+		p.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 		
 		players.remove(p);
 		main.getQueueRoom().sendPlayerToRoom(p);
@@ -59,6 +65,18 @@ public class DungeonPlayerManager implements Listener {
 	 */
 	public boolean playerInDungeon(Player p) {
 		return players.contains(p);
+	}
+	
+	public void sendActionBarMessage(String message) {
+		for(Player p : players) {
+			p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+		}
+	}
+	
+	public void sendTitleMessage(String title, String subtitle, int fadeIn, int stay, int fadeout) {
+		for(Player p : players) {
+			p.sendTitle(title, subtitle, fadeIn, stay, fadeout);
+		}		
 	}
 	
 	/**
@@ -77,6 +95,12 @@ public class DungeonPlayerManager implements Listener {
 		if(!playerInDungeon(event.getPlayer())) return;
 		removePlayer(event.getPlayer(), true);
 		event.setRespawnLocation(main.getQueueRoom().getEntranceLocation());
+	}
+	
+	@EventHandler
+	public void onPlayerLeave(PlayerQuitEvent event) {
+		if(!playerInDungeon(event.getPlayer())) return;
+		removePlayer(event.getPlayer(), true);		
 	}
 	
 	public List<Player> players() {

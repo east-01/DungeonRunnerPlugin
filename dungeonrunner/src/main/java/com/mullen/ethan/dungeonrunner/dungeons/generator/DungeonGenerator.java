@@ -14,6 +14,7 @@ import org.bukkit.block.BlockFace;
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureManager;
+import com.mullen.ethan.dungeonrunner.startwell.QueueRoom;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Utils;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
@@ -67,7 +68,7 @@ public class DungeonGenerator {
 		// Clear blocks. Once that's done, start the generate thread
 		int radius = 200;
 		int maxHeight = 160;
-		int minHeight = -45;
+		int minHeight = QueueRoom.MAX_HEIGHT + 1;
 		int increment = 30;
 		int counter = 0;
 		for (int y = minHeight; y < maxHeight; y += increment) {
@@ -226,7 +227,7 @@ public class DungeonGenerator {
 			if(!roomCube.isEmpty()) {
 				return false;
 			}
-			if(roomCube.getStartY() <= -46) {
+			if(roomCube.getStartY() <= QueueRoom.MAX_HEIGHT) {
 				return false;
 			}
 			

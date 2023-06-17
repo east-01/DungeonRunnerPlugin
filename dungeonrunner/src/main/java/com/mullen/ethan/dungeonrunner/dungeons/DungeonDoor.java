@@ -17,6 +17,10 @@ import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonWorldManager;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+
 /**
  * A dungeon door class
  */
@@ -27,7 +31,7 @@ public class DungeonDoor implements Listener {
 	
 	/* Door animation time in seconds */
 	public static float DOOR_ANIMATION_TIME = 0.4f;
-	public static float DOOR_OPEN_TIME = 3f;
+	public static float DOOR_OPEN_TIME = 5f;
 	public static int DOOR_HEIGHT = 3;
 	
 	private Main main;
@@ -39,12 +43,13 @@ public class DungeonDoor implements Listener {
 	private int timer;
 	private boolean locked;
 	
-	public DungeonDoor(Main main, Location doorLocation, boolean isWest) {
+	public DungeonDoor(Main main, Location doorLocation, boolean isWest, boolean isLocked) {
 		this.main = main;
 		this.dungeon = main.getCurrentDungeon();
 		this.doorLocation = doorLocation;
 		this.isWest = isWest;
 		this.cube = getCube();
+		this.locked = isLocked;
 		close(false);
 		
 		Bukkit.getPluginManager().registerEvents(this, main);
@@ -53,6 +58,8 @@ public class DungeonDoor implements Listener {
 	public void open(boolean animated) { 
 		if(!locked) {
 			setOpen(animated, true); 
+			timer = (int) (DOOR_OPEN_TIME*4); // *4 because, in timer method, 5/20=4. 4 ticks per second
+			timer();
 		} else {
 			doorLocation.getWorld().playSound(doorLocation, Sound.BLOCK_CHEST_LOCKED, 0.8f, 0.45f);
 		}
@@ -73,7 +80,8 @@ public class DungeonDoor implements Listener {
 						int x = isWest ? hOffset : 0;
 						int z = isWest ? 0 : hOffset;
 						Location loc = new Location(main.getDungeonWorld(), doorLocation.getBlockX() + x, doorLocation.getBlockY() + y, doorLocation.getBlockZ() + z);
-						loc.getBlock().setType(loc.equals(doorLocation) && !open ? UNLOCKED_MATERIAL : mat);
+						Material lockMaterial = locked ? LOCKED_MATERIAL : UNLOCKED_MATERIAL;
+						loc.getBlock().setType(loc.equals(doorLocation) && !open ? lockMaterial : mat);
 					}
 				}
 			}, (long) (20*yOffset*(DOOR_ANIMATION_TIME/3f)));
@@ -97,9 +105,11 @@ public class DungeonDoor implements Listener {
 		if(!b.getWorld().getName().equals(DungeonWorldManager.DUNGEON_WORLD_NAME)) return;
 		if(!cube.contains(b.getLocation())) return;
 		
+		if(locked && main.getCurrentDungeon().getBossDoor() == this) {
+			event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.RED + "Boss door is locked."));
+		}
+		
 		open(true);
-		timer = (int) (DOOR_OPEN_TIME*4); // *4 because, in timer method, 5/20=4. 4 ticks per second
-		timer();
 		
 	}
 	
@@ -123,7 +133,7 @@ public class DungeonDoor implements Listener {
 					}
 				}
 			}
-		}.runTaskTimer(main, 0l, 5l);
+		}.runTaskTimer(main, 0l, 2l);
 	}
 	
 	public void setLocked(boolean locked) {

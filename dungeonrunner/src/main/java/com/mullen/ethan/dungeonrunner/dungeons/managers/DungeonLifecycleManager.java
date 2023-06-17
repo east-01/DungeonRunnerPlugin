@@ -12,36 +12,49 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.mullen.ethan.custommobs.events.CustomMobDeathEvent;
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
-import com.mullen.ethan.dungeonrunner.dungeons.DungeonDoor;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureType;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
 import com.mullen.ethan.dungeonrunner.events.DungeonRoomClearEvent;
 import com.mullen.ethan.dungeonrunner.utils.MusicBox;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class DungeonLifecycleManager implements Listener {
 
 	private Main main;
 	private Dungeon dungeon;
 	
+	private int roomsToComplete;
+	private int roomsCompleted;
+	
 	public DungeonLifecycleManager(Main main, Dungeon dungeon) {
 		this.main = main;
 		this.dungeon = dungeon;
+		this.roomsCompleted = 0;
 		Bukkit.getPluginManager().registerEvents(this, main);
 	}
 	
 	@EventHandler
 	public void onRoomComplete(DungeonRoomClearEvent event) {
 		
+		this.roomsCompleted += 1;
 		RoomData room = event.getClearedRoom().getRoomData();
 		boolean isBossRoom = event.getClearedRoom().getRoomData().getStructureData().getStructureType() == StructureType.BOSS_ROOM;
 		Location centerRoom = room.getCube().getCenter().getWorldLocation(main.getDungeonWorld());
 		if(!isBossRoom) {
 			MusicBox.SMALL_WIN.playSong(main, centerRoom, 1f);
-			for(DungeonDoor childDoor : event.getClearedRoom().getRoomsDoors()) {
-				childDoor.setLocked(false);
+			event.getClearedRoom().unlockDoors();
+
+			// Means we've cleared all other rooms except boss door
+			if(roomsCompleted+1 == roomsToComplete) {
+				dungeon.sendActionBarMessage(ChatColor.GOLD + "" + ChatColor.ITALIC + "Room cleared! Boss door unlocked.");				
+				dungeon.getBossDoor().setLocked(false);
+			} else {
+				dungeon.sendActionBarMessage(ChatColor.GREEN + "" + ChatColor.ITALIC + "Room cleared!");								
 			}
 		} else {
+			dungeon.sendTitleMessage(ChatColor.GOLD + "Dungeon complete", "", 20, 20*5, 20);
 			MusicBox.LARGE_WIN.playSong(main, centerRoom, 1f);
 		}
 
@@ -66,6 +79,17 @@ public class DungeonLifecycleManager implements Listener {
 				if(itemLoc.getBlock().getType() == Material.AIR) itemLoc.getBlock().setType(Material.LIGHT);
 			}
 		}.runTaskTimer(main, 0L, 2L);
+	}
+
+	public float getProgress() {
+		return (float)roomsCompleted/(float)roomsToComplete;
+	}
+	
+	public void updateRoomsToComplete() {
+		this.roomsToComplete = 1; // Start with 1 to include the boss room
+		for(RoomManager rm : dungeon.getRoomManagers()) {
+			if(rm.isMobRoom()) roomsToComplete += 1;
+		}
 	}
 	
 }

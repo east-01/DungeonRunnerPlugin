@@ -13,6 +13,8 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Orientable;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
@@ -26,11 +28,13 @@ public class QueueRoom {
 
 	private Random rand;
 	
-	public static Vector3 CENTER_LOCATION = new Vector3(10.5f, -62, 8.5f);
-	public static Vector3 RETURN_LOCATION = new Vector3(14.5f, -62, 3.5f);
-	public static Vector3 PORTAL_LOCATION_1 = new Vector3(1, -63, 7);
-	public static Vector3 PORTAL_LOCATION_2 = new Vector3(1, -55, 9);
-	public static Vector3 ANCHOR_LOCATION = new Vector3(18, -63, 8);
+	public static int MAX_HEIGHT = -44;
+	public static Vector3 START_LOCATION = new Vector3(22.5f, -61, 14.5f);
+	public static Vector3 RETURN_LOCATION = new Vector3(10.5f, -61, 14.5f);
+	public static Vector3 PORTAL_LOCATION_1 = new Vector3(1, -58, 13);
+	public static Vector3 PORTAL_LOCATION_2 = new Vector3(1, -52, 15);
+	public static Vector3 ANCHOR_LOCATION = new Vector3(14, -62, 17);
+	public static Vector3 LODESTONE_LOCATION = new Vector3(14, -62, 11);
 	
 	private Main main;
 	private CraftingAnchor crafting;
@@ -116,6 +120,12 @@ public class QueueRoom {
 	}
 	
 	public void generate() {
+		// Clear old armor stands
+		for(Entity e : main.getDungeonWorld().getEntities()) {
+			if(!(e instanceof ArmorStand)) continue;
+			e.remove();
+		}
+		
 		World dungeonWorld = main.getDungeonWorld();
 		NameLabelUtils.createTextDisplay(ChatColor.AQUA + "Leave here", RETURN_LOCATION.clone().add(new Vector3(0, 1.5f, 0)).getWorldLocation(dungeonWorld));
 		Vector3 anchorTextLoc = ANCHOR_LOCATION.clone().add(new Vector3(0.5f, 2.5f, 0.5f));
@@ -142,7 +152,7 @@ public class QueueRoom {
 	}
 	
 	public boolean isRoomGenerated() {
-		return main.getDungeonWorld().getBlockAt(3, main.getDungeonWorld().getMinHeight(), 1).getType() == Material.DEEPSLATE_TILES;
+		return ANCHOR_LOCATION.getWorldLocation(main.getDungeonWorld()).getBlock().getType() == Material.RESPAWN_ANCHOR;
 	}
 	
 	public boolean isPlayerInRoom(Player p) {
@@ -158,7 +168,7 @@ public class QueueRoom {
 	}
 	
 	public Location getEntranceLocation() {
-		return CENTER_LOCATION.getWorldLocation(main.getDungeonWorld());
+		return START_LOCATION.getWorldLocation(main.getDungeonWorld());
 	}
 	
 }

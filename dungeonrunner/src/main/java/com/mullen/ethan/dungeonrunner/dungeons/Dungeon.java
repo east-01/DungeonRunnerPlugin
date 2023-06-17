@@ -2,6 +2,7 @@ package com.mullen.ethan.dungeonrunner.dungeons;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,10 +21,12 @@ import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonGenerator;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonTheme;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.GeneratorSettings;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
-import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTable;
+import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
+import com.mullen.ethan.dungeonrunner.dungeons.loot.TieredLootTable;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonLifecycleManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonMobManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonPlayerManager;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonScoreboardManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.RoomManager;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
@@ -36,11 +39,13 @@ public class Dungeon {
 	
 	private DungeonLifecycleManager dungeonLifecycleManager;
 	private DungeonPlayerManager dungeonPlayerManager;
+	private DungeonScoreboardManager dungeonScoreboardManager;
 	private DungeonMobManager dungeonMobManager;
 	private List<RoomManager> roomManagers;
 	
 	private Location startLocation;
-
+	private DungeonDoor bossDoor;
+	
 	public Dungeon(Main instance, GeneratorSettings settings) {
 		
 		this.main = instance;
@@ -48,10 +53,12 @@ public class Dungeon {
 		this.settings = settings;
 		this.dungeonGenerator = new DungeonGenerator(instance, settings, dungeonCompleteRunnable);
 
+		this.roomManagers = new ArrayList<RoomManager>();
+
 		this.dungeonLifecycleManager = new DungeonLifecycleManager(instance, this);
 		this.dungeonPlayerManager = new DungeonPlayerManager(instance, this);
+		this.dungeonScoreboardManager = new DungeonScoreboardManager(instance, this);
 		this.dungeonMobManager = new DungeonMobManager(instance, this);
-		this.roomManagers = new ArrayList<RoomManager>();
 		
 	}
 
@@ -78,6 +85,8 @@ public class Dungeon {
 				roomManagers.add(new RoomManager(main, Dungeon.this, room));
 			}		
 
+			dungeonLifecycleManager.updateRoomsToComplete();
+			
 		}
 	};
 	
@@ -115,20 +124,20 @@ public class Dungeon {
 				if(b.getType() != Material.CHEST) {
 					continue;
 				}
-				int tierCount = main.getLootTable().length-1;
 				float distancePercent = (float)room.getDistance()/(float)dungeonGenerator.getFurthestDistance();
-				int tier = (int) Math.floor((distancePercent)*(tierCount));
-				LootTable table = main.getLootTable()[tier];
-				fillChest(b, table);
+				float tier = distancePercent * LootTableGenerator.MAX_TIER;
+				fillChest(b, main.getLootTable(), tier);
 			}
 		}
 	}
 	
-	public static void fillChest(Block b, LootTable table) {
+	public static void fillChest(Block b, TieredLootTable table, float tier) {
 		Chest c = (Chest) b.getState();
 		Inventory inv = c.getInventory();
+		Random rand = new Random();
 		for(int i = 0; i < inv.getSize(); i++) {
-			ItemStack item = table.pollItem();
+			if(rand.nextInt(100) > 15) continue; // Only 15% of slots get filled
+			ItemStack item = table.pollEntry(tier);
 			inv.setItem(i, item);
 		}
 	}
@@ -138,6 +147,8 @@ public class Dungeon {
 	public void addPlayer(Player p) { dungeonPlayerManager.addPlayer(p); }
 	public void removePlayer(Player p, boolean wasForced) { dungeonPlayerManager.removePlayer(p, wasForced); }
 	public boolean isPlayerInDungeon(Player p) { return dungeonPlayerManager.playerInDungeon(p); }
+	public void sendActionBarMessage(String message) { dungeonPlayerManager.sendActionBarMessage(message); }
+	public void sendTitleMessage(String title, String subtitle, int fadeIn, int stay, int fadeout) { dungeonPlayerManager.sendTitleMessage(title, subtitle, fadeIn, stay, fadeout); }
 	
 	public List<Entity> getDungeonEntities() { return dungeonMobManager.getMobs(); }
 	public void addEntity(Entity e) { dungeonMobManager.addMob(e); }
@@ -145,9 +156,17 @@ public class Dungeon {
 	public Entity getBoss() { return dungeonMobManager.getBoss(); }
 	
 	public DungeonTheme getDungeonTheme() { return dungeonGenerator.getSettings().getTheme(); }
+	public float getProgress() { return dungeonLifecycleManager.getProgress(); }
+
+	public DungeonDoor getBossDoor() { return bossDoor; }
+	public void setBossDoor(DungeonDoor bossDoor) { this.bossDoor = bossDoor; }
 	
 	public Location getStartLocation() {
 		return startLocation;
 	}
-				
+	
+	public List<RoomManager> getRoomManagers() {
+		return roomManagers;
+	}
+			
 }
