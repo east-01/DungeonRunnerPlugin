@@ -18,7 +18,6 @@ import org.bukkit.inventory.ItemStack;
 
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonGenerator;
-import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonTheme;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.GeneratorSettings;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
@@ -28,6 +27,7 @@ import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonMobManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonPlayerManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonScoreboardManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.RoomManager;
+import com.mullen.ethan.dungeonrunner.fileloading.DungeonTheme;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
 public class Dungeon {
@@ -155,7 +155,8 @@ public class Dungeon {
 	public boolean isBossSpawned() { return dungeonMobManager.isBossSpawned(); }
 	public Entity getBoss() { return dungeonMobManager.getBoss(); }
 	
-	public DungeonTheme getDungeonTheme() { return dungeonGenerator.getSettings().getTheme(); }
+	public String getDungeonThemeName() { return dungeonGenerator.getSettings().getTheme(); }
+	public DungeonTheme getDungeonTheme() { return main.getThemeManager().getTheme(getDungeonThemeName()); }
 	public float getProgress() { return dungeonLifecycleManager.getProgress(); }
 
 	public DungeonDoor getBossDoor() { return bossDoor; }

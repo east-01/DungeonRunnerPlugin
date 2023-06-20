@@ -14,6 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonWorldManager;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.RoomManager;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
@@ -28,14 +29,16 @@ public class DungeonDoor implements Listener {
 
 	public static Material UNLOCKED_MATERIAL = Material.IRON_BLOCK;
 	public static Material LOCKED_MATERIAL = Material.REDSTONE_BLOCK;
+	public static Material CLEARED_MATERIAL = Material.EMERALD_BLOCK;
 	
 	/* Door animation time in seconds */
-	public static float DOOR_ANIMATION_TIME = 0.4f;
-	public static float DOOR_OPEN_TIME = 5f;
+	public static float DOOR_ANIMATION_TIME = 0.3f;
+	public static float DOOR_OPEN_TIME = 7f;
 	public static int DOOR_HEIGHT = 3;
 	
 	private Main main;
 	private Dungeon dungeon;
+	private RoomManager room;
 	// This location is at the bottom center of the door
 	private Location doorLocation;
 	private boolean isWest;
@@ -43,8 +46,9 @@ public class DungeonDoor implements Listener {
 	private int timer;
 	private boolean locked;
 	
-	public DungeonDoor(Main main, Location doorLocation, boolean isWest, boolean isLocked) {
+	public DungeonDoor(Main main, RoomManager room, Location doorLocation, boolean isWest, boolean isLocked) {
 		this.main = main;
+		this.room = room;
 		this.dungeon = main.getCurrentDungeon();
 		this.doorLocation = doorLocation;
 		this.isWest = isWest;
@@ -67,6 +71,7 @@ public class DungeonDoor implements Listener {
 	public void close(boolean animated) { setOpen(animated, false); }
 	public void setOpen(boolean animated, boolean open) {
 		if(animated) doorLocation.getWorld().playSound(doorLocation, open ? Sound.BLOCK_WOODEN_DOOR_OPEN : Sound.BLOCK_WOODEN_DOOR_CLOSE, 0.8f, 0.45f);
+		
 		// Animation frame, should be the height of the door
 		Material mat = open ? Material.AIR : dungeon.getDungeonTheme().getDoorMaterial();
 		for(int yOffset = 0; yOffset < DOOR_HEIGHT; yOffset++) {
@@ -80,8 +85,7 @@ public class DungeonDoor implements Listener {
 						int x = isWest ? hOffset : 0;
 						int z = isWest ? 0 : hOffset;
 						Location loc = new Location(main.getDungeonWorld(), doorLocation.getBlockX() + x, doorLocation.getBlockY() + y, doorLocation.getBlockZ() + z);
-						Material lockMaterial = locked ? LOCKED_MATERIAL : UNLOCKED_MATERIAL;
-						loc.getBlock().setType(loc.equals(doorLocation) && !open ? lockMaterial : mat);
+						loc.getBlock().setType(loc.equals(doorLocation) && !open ? getLockmaterial() : mat);
 					}
 				}
 			}, (long) (20*yOffset*(DOOR_ANIMATION_TIME/3f)));
@@ -136,9 +140,19 @@ public class DungeonDoor implements Listener {
 		}.runTaskTimer(main, 0l, 2l);
 	}
 	
+	private Material getLockmaterial() {
+		Material lockMaterial = UNLOCKED_MATERIAL;
+		if(locked) {
+			lockMaterial = LOCKED_MATERIAL;
+		}/* else if(room.isCleared()) { <- this feature isn't really clear
+			lockMaterial = CLEARED_MATERIAL;
+		}*/
+		return lockMaterial;
+	}
+	
 	public void setLocked(boolean locked) {
-		doorLocation.getBlock().setType(locked ? LOCKED_MATERIAL : UNLOCKED_MATERIAL);
 		this.locked = locked;
+		doorLocation.getBlock().setType(getLockmaterial());
 	}
 	
 	public boolean isLocked() {

@@ -1,5 +1,6 @@
 package com.mullen.ethan.dungeonrunner.dungeons.generator;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,6 +15,8 @@ import org.bukkit.block.BlockFace;
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureManager;
+import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureType;
+import com.mullen.ethan.dungeonrunner.fileloading.DungeonTheme;
 import com.mullen.ethan.dungeonrunner.startwell.QueueRoom;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Utils;
@@ -117,25 +120,26 @@ public class DungeonGenerator {
 
 	private Thread generateThread = new Thread(() -> {
 
+		DungeonTheme theme = main.getThemeManager().getTheme(settings.getTheme());
 		boolean success = true;
 		for(int i = 0; i < settings.getRoomLimit(); i++) {
 			if(fatalErrorFlag) break;
 						
 			// Select room type
-			List<String> roomOptions = null;
+			List<File> roomOptions = null;
 			if(i == 0) {
-				roomOptions = settings.getTheme().getStartRooms();
+				roomOptions = theme.getStructures(StructureType.START_ROOM);
 			} else if(i > 0 && i < settings.getRoomLimit()-1) {
-				roomOptions = settings.getTheme().getRooms();
+				roomOptions = theme.getRooms();
 			} else {
-				roomOptions = settings.getTheme().getBossRooms();
+				roomOptions = theme.getStructures(StructureType.BOSS_ROOM);
 			}
-			String roomName = roomOptions.get(rand.nextInt(roomOptions.size()));
+			File roomFile = roomOptions.get(rand.nextInt(roomOptions.size()));
 
 			int attempt;
 			for(attempt = 0; attempt < ROOM_GENERATE_ATTEMPT_LIMIT; attempt++) {
 				if(fatalErrorFlag) break;
-				boolean roomGenerateSuccess = generateRoom(roomName, i);
+				boolean roomGenerateSuccess = generateRoom(roomFile, i);
 				if(roomGenerateSuccess) {
 					if(i % 3 == 0) {
 						float progress = (float)i/(float)settings.getRoomLimit();
@@ -170,16 +174,16 @@ public class DungeonGenerator {
 
 	});
 
-	private boolean generateRoom(String roomName, int roomNumber) {
+	private boolean generateRoom(File roomFile, int roomNumber) {
 		try {
 
-			if(!structureManager.hasData(roomName)) {
-				structureManager.preprocessStructure(roomName);
+			if(!structureManager.hasData(roomFile)) {
+				structureManager.preprocessStructure(roomFile);
 				sem.acquire();
 			}
 			
 			// Generate current room data
-			RoomData currentData = new RoomData(main, structureManager.getData(roomName));
+			RoomData currentData = new RoomData(main, structureManager.getData(roomFile));
 
 			// If this is the start room, just place it down. No need for door math
 			if(roomNumber == 0) {
@@ -187,7 +191,7 @@ public class DungeonGenerator {
 				startRoom.setLocation(startLocation);
 				startRoom.applyRotation(StructureRotation.NONE);
 								
-				structureManager.generateStructure(roomName, startLocation, startRoom.getRotation());
+				structureManager.generateStructure(roomFile, startLocation, startRoom.getRotation());
 				sem.acquire();
 				return true;
 			}
@@ -231,7 +235,7 @@ public class DungeonGenerator {
 				return false;
 			}
 			
-			structureManager.generateStructure(roomName, currentData.getLocation(), currentData.getRotation());
+			structureManager.generateStructure(roomFile, currentData.getLocation(), currentData.getRotation());
 			sem.acquire();
 
 			allRooms.add(currentData);
@@ -266,9 +270,7 @@ public class DungeonGenerator {
 			Vector3 worldLoc = new Vector3(data.getLocation().x + doorOffset.x, data.getLocation().y + doorOffset.y, data.getLocation().z + doorOffset.z);
 
 			// Check which direction the door is
-//			Vector3 xDirection = new Vector3(worldLoc.x + 2, worldLoc.y, worldLoc.z);
 			BlockFace facing = data.getDoorExitDirection(doorOffset);
-//			boolean isXDirection = xDirection.getWorldLocation(main.getDungeonWorld()).getBlock().getType() == settings.getTheme().getDoorMaterial();
 			boolean isXDirection = facing == BlockFace.NORTH || facing == BlockFace.SOUTH;
 			
 			Cube cube = null;
@@ -278,7 +280,7 @@ public class DungeonGenerator {
 				cube = new Cube(new Vector3(worldLoc.x, worldLoc.y - 1, worldLoc.z - 2), new Vector3(worldLoc.x, worldLoc.y + 3, worldLoc.z + 2));
 			}
 			cube.setWorld(main.getDungeonWorld());
-			cube.fill(settings.getTheme().getDoorMaterial());
+			cube.fill(main.getThemeManager().getTheme(settings.getTheme()).getDoorMaterial());
 		}
 
 		// Make recursive call

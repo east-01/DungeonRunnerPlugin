@@ -28,7 +28,7 @@ public class StructureManager {
 	private Main main;
 	private Semaphore sem;
 
-	private HashMap<String, StructureData> processedData;
+	private HashMap<File, StructureData> processedData;
 
 	public StructureManager(Main instance, Semaphore sem) {
 		this.main = instance;
@@ -41,10 +41,9 @@ public class StructureManager {
 	 * Once completed, you will be able to read the data with getData(String name)
 	 * @param name The name of the structure you want to process.
 	 */
-	public void preprocessStructure(String name) {
-		Path filePath = main.getDataFolder().toPath().resolve(name + ".nbt");
-		processedData.put(name, new StructureData());
-		processedData.get(name).setName(name);
+	public void preprocessStructure(File file) {
+		processedData.put(file, new StructureData(file));
+		
 		// A list of the offsets from the original locations that have oak signs
 		List<Vector3> signOffsets = new ArrayList<>();
 		List<Vector3> chestOffsets = new ArrayList<>();
@@ -60,7 +59,7 @@ public class StructureManager {
 					return true; // Return true to confirm block placement, false to cancel block placement
 
 				})
-				.loadFromPath(filePath)
+				.loadFromPath(file.toPath())
 				.onException(e -> main.getLogger().log(Level.SEVERE, "Failed to load structure.", e))
 				.onResult(e -> {
 
@@ -71,7 +70,7 @@ public class StructureManager {
 						if(!isReadableSign) continue;
 						Sign s = (Sign) b.getState();
 						if(s.getSide(Side.FRONT).getLine(0).equalsIgnoreCase("door")) {
-							processedData.get(name).addDoorLocation(offset);
+							processedData.get(file).addDoorLocation(offset);
 						}
 					}
 
@@ -79,12 +78,12 @@ public class StructureManager {
 						Location signLoc = new Location(main.getDungeonWorld(), offset.x, offset.y, offset.z);
 						Block b = signLoc.getBlock();
 						if(b.getType() == Material.CHEST) {
-							processedData.get(name).addChestLocation(offset);
+							processedData.get(file).addChestLocation(offset);
 						}
 					}
 
-					Vector3 structureSize = getStructureSize(name);
-					processedData.get(name).setSize(structureSize);
+					Vector3 structureSize = getStructureSize(file);
+					processedData.get(file).setSize(structureSize);
 
 					// Clear blocks
 					for(int x = 0; x < structureSize.x; x++) {
@@ -100,12 +99,11 @@ public class StructureManager {
 				});
 	}
 
-	public void generateStructure(String name, Vector3 location, StructureRotation rotation) {
-		Path filePath = main.getDataFolder().toPath().resolve(name + ".nbt");
+	public void generateStructure(File file, Vector3 location, StructureRotation rotation) {
 		StructureBlockLibApi.INSTANCE.loadStructure(main)
 				.at(new Location(main.getDungeonWorld(), location.x, location.y, location.z))
 				.rotation(rotation)
-				.loadFromPath(filePath)
+				.loadFromPath(file.toPath())
 				.onException(e -> main.getLogger().log(Level.SEVERE, "Failed to load structure.", e))
 				.onResult(e -> {
 					sem.release();
@@ -124,10 +122,10 @@ public class StructureManager {
 				});
 	}
 	
-	public Vector3 getStructureSize(String name) {
+	public Vector3 getStructureSize(File file) {
 		try {
-			NBTFile file = new NBTFile(new File(main.getDataFolder(), name + ".nbt"));
-			NBTList<Integer> intList = file.getIntegerList("size");
+			NBTFile nbtFile = new NBTFile(file);
+			NBTList<Integer> intList = nbtFile.getIntegerList("size");
 			return new Vector3(intList.get(0), intList.get(1), intList.get(2));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -135,12 +133,12 @@ public class StructureManager {
 		return null;
 	}
 
-	public boolean hasData(String structureName) {
-		return processedData.containsKey(structureName);
+	public boolean hasData(File structureFile) {
+		return processedData.containsKey(structureFile);
 	}
 
-	public StructureData getData(String structureName) {
-		return processedData.get(structureName).clone();
+	public StructureData getData(File structureFile) {
+		return processedData.get(structureFile).clone();
 	}
 
 }

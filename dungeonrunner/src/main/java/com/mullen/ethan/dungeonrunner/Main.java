@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -17,6 +18,9 @@ import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.TieredLootTable;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonWorldManager;
+import com.mullen.ethan.dungeonrunner.fileloading.FileLoader;
+import com.mullen.ethan.dungeonrunner.fileloading.ThemeManager;
+import com.mullen.ethan.dungeonrunner.hordes.HordeManager;
 import com.mullen.ethan.dungeonrunner.startwell.QueueRoom;
 import com.mullen.ethan.dungeonrunner.startwell.StartWell;
 
@@ -30,10 +34,14 @@ import com.mullen.ethan.dungeonrunner.startwell.StartWell;
 // Thanks https://github.com/Shynixn/StructureBlockLib
 public class Main extends JavaPlugin {
 
+	private FileLoader fileLoader;
+	
 	private DungeonWorldManager dungeonWorldManager;
 	private DungeonCommands dungeonCommands;
 	
 	private Dungeon currentDungeon;
+	private ThemeManager themeManager;
+	private HordeManager hordeManager;
 	
 	private CustomMobs customBosses;
 	private TieredLootTable lootTable;
@@ -43,18 +51,22 @@ public class Main extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
+		this.fileLoader = new FileLoader(this);
+		
 		this.dungeonWorldManager = new DungeonWorldManager(this);
 		this.dungeonCommands = new DungeonCommands(this);
 			
 		getCommand("dungeon").setExecutor(dungeonCommands);
 	
+		this.themeManager = new ThemeManager(this);
+		this.hordeManager = new HordeManager(this);
+		
+		this.customBosses = (CustomMobs) getServer().getPluginManager().getPlugin("CustomMobs");
 		this.lootTable = LootTableGenerator.getTieredLootTable();
 				
 		this.queueRoom = new QueueRoom(this);
 		this.startingWell = new StartWell(this);
-		
-		this.customBosses = (CustomMobs) getServer().getPluginManager().getPlugin("CustomMobs");
-		
+						
 	}
 
 	@Override
@@ -85,6 +97,9 @@ public class Main extends JavaPlugin {
 		return false;
     }
 
+	public FileLoader getFileLoader() { return fileLoader; }
+	public FileConfiguration getConfig(String filePath) { return fileLoader.getConfig(filePath); }
+	
 	public DungeonWorldManager getDungeonWorldManager() {
 		return dungeonWorldManager;
 	}
@@ -101,6 +116,12 @@ public class Main extends JavaPlugin {
 		if(currentDungeon != null) currentDungeon.close();
 		this.currentDungeon = newDungeon;
 	}
+	
+	public ThemeManager getThemeManager() {
+		return themeManager;
+	}
+	
+	public HordeManager getHordeManager() { return hordeManager; }
 	
 	public CustomMobs getCustomBosses() {
 		return customBosses;

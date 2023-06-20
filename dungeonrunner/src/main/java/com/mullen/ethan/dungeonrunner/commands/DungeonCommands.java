@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
-import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonTheme;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.GeneratorSettings;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.MusicBox;
@@ -39,8 +38,8 @@ public class DungeonCommands implements CommandExecutor {
 				return true;
 			}
 			
-			DungeonTheme theme = DungeonTheme.CAVE;
-			int roomCount = 30+(new Random().nextInt(30));
+			String theme = "cave";
+			int roomCount = 10+(new Random().nextInt(10));
 			int seed = -1;
 			if(args.length > 1 && args.length != 4) {
 				sender.sendMessage(ChatColor.RED + "Incorrect number of arguments.");
@@ -48,7 +47,7 @@ public class DungeonCommands implements CommandExecutor {
 				return true;
 			}
 			if(args.length == 4) {
-				if(DungeonTheme.valueOf(args[1]) == null) {
+				if(main.getThemeManager().getTheme(args[1].toLowerCase()) == null) {
 					sender.sendMessage(ChatColor.RED + "Incorrect theme \"" + args[1] + "\"");
 					sender.sendMessage(ChatColor.RED + "Usage: /dungeon generate or /dungeon generate <theme> <room count> <seed>");
 					return true;				
@@ -69,7 +68,7 @@ public class DungeonCommands implements CommandExecutor {
 					return true;								
 				}
 				
-				theme = DungeonTheme.valueOf(args[1]);
+				theme = args[1].toLowerCase();
 				roomCount = Integer.parseInt(args[2]);
 				seed = Integer.parseInt(args[3]);
 			}

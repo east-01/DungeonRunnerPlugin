@@ -1,27 +1,37 @@
 package com.mullen.ethan.dungeonrunner.dungeons.generator.structures;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bukkit.Bukkit;
 
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
 public class StructureData {
 
-	private String name;
+	private File file;
 	private Vector3 size;
 	private List<Vector3> doorLocations;
 	private List<Vector3> chestLocations;
 	private StructureType structureType;
 
-	public StructureData(String name, Vector3 size, List<Vector3> doorLocations, List<Vector3> chestLocations) {
-		setName(name);
+	public StructureData(File file, Vector3 size, List<Vector3> doorLocations, List<Vector3> chestLocations) {
+		this.file = file;
 		this.size = size;
 		this.doorLocations = doorLocations;
 		this.chestLocations = chestLocations;
+		
+		String parentName = file.getParentFile().getName().toUpperCase();
+		try {
+			this.structureType = StructureType.valueOf(parentName);
+		} catch(Exception e) {
+			Bukkit.getLogger().severe("Wasn't able to interpret StructureType from parent folder name \"" + parentName + "\"");
+		}
 	}
 
-	public StructureData() {
-		this("", new Vector3(), new ArrayList<Vector3>(), new ArrayList<Vector3>());
+	public StructureData(File file) {
+		this(file, new Vector3(), new ArrayList<Vector3>(), new ArrayList<Vector3>());
 	}
 	
 	public StructureData clone() {
@@ -33,28 +43,11 @@ public class StructureData {
 		for(Vector3 chest : chestLocations) {
 			chestsCopy.add(chest);
 		}
-		return new StructureData(name, size.clone(), doorsCopy, chestsCopy);
+		return new StructureData(file, size.clone(), doorsCopy, chestsCopy);
 	}
-	
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-		// Infer structure type from name
-		this.structureType = null;
-		if(name.toLowerCase().contains("small_room")) {
-			this.structureType = StructureType.SMALL_ROOM;
-		} else if(name.toLowerCase().contains("large_room")) {
-			this.structureType = StructureType.LARGE_ROOM;
-		} else if(name.toLowerCase().contains("boss_room")) {
-			this.structureType = StructureType.BOSS_ROOM;
-		} else if(name.toLowerCase().contains("start_room")) {
-			this.structureType = StructureType.START_ROOM;
-		} else if(name.toLowerCase().contains("hallway")) {
-			this.structureType = StructureType.HALLWAY;
-		}
+		
+	public File getFile() {
+		return file;
 	}
 	
 	public Vector3 getSize() {
@@ -103,6 +96,10 @@ public class StructureData {
 	
 	public StructureType getStructureType() {
 		return structureType;
+	}
+	
+	public void setStructureType(StructureType type) {
+		this.structureType = type;
 	}
 	
 }

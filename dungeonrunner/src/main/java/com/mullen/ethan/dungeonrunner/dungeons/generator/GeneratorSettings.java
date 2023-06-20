@@ -2,21 +2,21 @@ package com.mullen.ethan.dungeonrunner.dungeons.generator;
 
 public class GeneratorSettings {
 
-	private DungeonTheme theme;
+	private String theme;
 	private int roomCount;
 	private int seed;
 	
-	public GeneratorSettings(DungeonTheme theme, int roomCount, int seed) {
+	public GeneratorSettings(String theme, int roomCount, int seed) {
 		this.theme = theme;
 		this.roomCount = roomCount;
 		this.seed = seed;
 	}
 
-	public DungeonTheme getTheme() {
+	public String getTheme() {
 		return theme;
 	}
 
-	public void setTheme(DungeonTheme theme) {
+	public void setTheme(String theme) {
 		this.theme = theme;
 	}
 

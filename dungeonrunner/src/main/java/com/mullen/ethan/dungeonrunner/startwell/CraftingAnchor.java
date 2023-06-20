@@ -1,5 +1,6 @@
 package com.mullen.ethan.dungeonrunner.startwell;
 
+import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 
@@ -19,7 +20,6 @@ import org.bukkit.event.player.PlayerPortalEvent;
 
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
-import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonTheme;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.GeneratorSettings;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
@@ -47,7 +47,8 @@ public class CraftingAnchor implements Listener {
 		}
 		
 		// TODO: Make crafting influence generator settings
-		DungeonTheme theme = DungeonTheme.CAVE;
+		List<String> themes = main.getThemeManager().getThemeNames();
+		String theme = themes.get(new Random().nextInt(themes.size()));
 		int roomCount = 15+(new Random().nextInt(15)); 
 		int seed = -1;
 		Dungeon dungeon = new Dungeon(main, new GeneratorSettings(theme, roomCount, seed));
