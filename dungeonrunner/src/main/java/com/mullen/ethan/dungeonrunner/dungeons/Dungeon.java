@@ -23,11 +23,15 @@ import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
 import com.mullen.ethan.dungeonrunner.dungeons.loot.TieredLootTable;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonLifecycleManager;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonMapManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonMobManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonPlayerManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonScoreboardManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.RoomManager;
 import com.mullen.ethan.dungeonrunner.fileloading.DungeonTheme;
+import com.mullen.ethan.dungeonrunner.maps.DungeonMapRenderer;
+import com.mullen.ethan.dungeonrunner.utils.Cube;
+import com.mullen.ethan.dungeonrunner.utils.Utils;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
 public class Dungeon {
@@ -40,11 +44,13 @@ public class Dungeon {
 	private DungeonLifecycleManager dungeonLifecycleManager;
 	private DungeonPlayerManager dungeonPlayerManager;
 	private DungeonScoreboardManager dungeonScoreboardManager;
+	private DungeonMapManager dungeonMapManager;
 	private DungeonMobManager dungeonMobManager;
 	private List<RoomManager> roomManagers;
 	
 	private Location startLocation;
 	private DungeonDoor bossDoor;
+	private Cube bounds;
 	
 	public Dungeon(Main instance, GeneratorSettings settings) {
 		
@@ -58,13 +64,15 @@ public class Dungeon {
 		this.dungeonLifecycleManager = new DungeonLifecycleManager(instance, this);
 		this.dungeonPlayerManager = new DungeonPlayerManager(instance, this);
 		this.dungeonScoreboardManager = new DungeonScoreboardManager(instance, this);
+		this.dungeonMapManager = new DungeonMapManager(instance, this);
 		this.dungeonMobManager = new DungeonMobManager(instance, this);
 		
 	}
 
-	public void generate() {
+	public void generate() { generate(false); }
+	public void generate(boolean quickGen) {
 		Bukkit.broadcastMessage(ChatColor.AQUA + "Generating new dungeon, expect lag.");
-		dungeonGenerator.generate();
+		dungeonGenerator.generate(quickGen);
 	}
 	
 	private Runnable dungeonCompleteRunnable = new Runnable() {
@@ -81,10 +89,11 @@ public class Dungeon {
 	
 			// Create room managers
 			for(RoomData room : dungeonGenerator.getAllRooms()) {
-				if(room.equals(dungeonGenerator.getStartRoom())) continue;
 				roomManagers.add(new RoomManager(main, Dungeon.this, room));
 			}		
-
+			
+			bounds = Utils.getDungeonBounds(Dungeon.this);
+			
 			dungeonLifecycleManager.updateRoomsToComplete();
 			
 		}
@@ -107,6 +116,7 @@ public class Dungeon {
 		// Make sure to unregister from events
 		HandlerList.unregisterAll(dungeonLifecycleManager);
 		HandlerList.unregisterAll(dungeonPlayerManager);
+		HandlerList.unregisterAll(dungeonMapManager);
 		HandlerList.unregisterAll(dungeonMobManager);
 		for(RoomManager rm : roomManagers) {
 			for(DungeonDoor dd : rm.getRoomsDoors()) {
@@ -154,17 +164,22 @@ public class Dungeon {
 	public void addEntity(Entity e) { dungeonMobManager.addMob(e); }
 	public boolean isBossSpawned() { return dungeonMobManager.isBossSpawned(); }
 	public Entity getBoss() { return dungeonMobManager.getBoss(); }
-	
-	public String getDungeonThemeName() { return dungeonGenerator.getSettings().getTheme(); }
-	public DungeonTheme getDungeonTheme() { return main.getThemeManager().getTheme(getDungeonThemeName()); }
+
+	public List<RoomManager> getDiscoveredRooms() { return dungeonLifecycleManager.getDiscoveredRooms(); }
+	public void addDiscoveredRoom(RoomManager rm) { dungeonLifecycleManager.addDiscoveredRoom(rm); }
 	public float getProgress() { return dungeonLifecycleManager.getProgress(); }
 
+	public String getDungeonThemeName() { return dungeonGenerator.getSettings().getTheme(); }
+	public DungeonTheme getDungeonTheme() { return main.getThemeManager().getTheme(getDungeonThemeName()); }
+
 	public DungeonDoor getBossDoor() { return bossDoor; }
-	public void setBossDoor(DungeonDoor bossDoor) { this.bossDoor = bossDoor; }
+	public void setBossDoor(DungeonDoor bossDoor) { this.bossDoor = bossDoor; }	
 	
-	public Location getStartLocation() {
-		return startLocation;
-	}
+	public void addMapRenderer(DungeonMapRenderer renderer) { dungeonMapManager.addRenderer(renderer); }
+	public void invalidateMasterImages() { dungeonMapManager.invalidateMasterImages(); }
+	
+	public Location getStartLocation() { return startLocation; }
+	public Cube getBounds() { return bounds; }
 	
 	public List<RoomManager> getRoomManagers() {
 		return roomManagers;

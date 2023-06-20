@@ -25,6 +25,7 @@ import com.mullen.ethan.dungeonrunner.utils.Vector3;
 public class DungeonGenerator {
 
 	public static final int ROOM_GENERATE_ATTEMPT_LIMIT = 100;
+	public static final int RADIUS = 200;
 	public static final String GENERATOR_PREFIX = ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "DungeonGenerator" + ChatColor.DARK_AQUA + "] " + ChatColor.AQUA;
 	
 	public Random rand;
@@ -65,34 +66,42 @@ public class DungeonGenerator {
 			
 	}
 
-	public void generate() {
+	public void generate() {generate(false);}
+	
+	public void generate(boolean quickClear) {
 		Bukkit.getConsoleSender().sendMessage(GENERATOR_PREFIX + "Generating a new dungeon, clearing blocks...");
-		
-		// Clear blocks. Once that's done, start the generate thread
-		int radius = 200;
 		int maxHeight = 160;
 		int minHeight = QueueRoom.MAX_HEIGHT + 1;
-		int increment = 30;
-		int counter = 0;
-		for (int y = minHeight; y < maxHeight; y += increment) {
-		    final int currentHeight = y; // Store the current height in a final variable for the anonymous inner class
-		    Bukkit.getScheduler().scheduleSyncDelayedTask(main, new Runnable() {
-		        @Override
-		        public void run() {
-		            int startY = currentHeight + 1;
-		            int endY = currentHeight + increment;
-		            Cube c = new Cube(new Vector3(-radius, startY, -radius), new Vector3(radius, endY, radius));
-		            c.setWorld(main.getDungeonWorld());
-		            c.fill(Material.AIR);
-		            
-		            if(endY >= maxHeight) {
-		        		Bukkit.getConsoleSender().sendMessage(GENERATOR_PREFIX + "Starting generate thread.");
-		        		generateThread.start();
-		            }
-		            
-		        }
-		    }, 10L * counter);
-		    counter++;
+		
+		// Clear blocks. Once that's done, start the generate thread
+		if(!quickClear) {
+			int increment = 30;
+			int counter = 0;
+			for (int y = minHeight; y < maxHeight; y += increment) {
+			    final int currentHeight = y; // Store the current height in a final variable for the anonymous inner class
+			    Bukkit.getScheduler().scheduleSyncDelayedTask(main, new Runnable() {
+			        @Override
+			        public void run() {
+			            int startY = currentHeight + 1;
+			            int endY = currentHeight + increment;
+			            Cube c = new Cube(new Vector3(-RADIUS, startY, -RADIUS), new Vector3(RADIUS, endY, RADIUS));
+			            c.setWorld(main.getDungeonWorld());
+			            c.fill(Material.AIR);
+			            
+			            if(endY >= maxHeight) {
+			        		Bukkit.getConsoleSender().sendMessage(GENERATOR_PREFIX + "Starting generate thread.");
+			        		generateThread.start();
+			            }
+			            
+			        }
+			    }, 10L * counter);
+			    counter++;
+			}
+		} else {
+            Cube c = new Cube(new Vector3(-RADIUS, minHeight, -RADIUS), new Vector3(RADIUS, maxHeight, RADIUS));
+            c.setWorld(main.getDungeonWorld());
+            c.fill(Material.AIR);
+            generateThread.start();
 		}
 	}
 
@@ -193,6 +202,8 @@ public class DungeonGenerator {
 								
 				structureManager.generateStructure(roomFile, startLocation, startRoom.getRotation());
 				sem.acquire();
+				
+				allRooms.add(currentData);
 				return true;
 			}
 

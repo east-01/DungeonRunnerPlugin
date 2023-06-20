@@ -13,7 +13,6 @@ import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.GeneratorSettings;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
-import com.mullen.ethan.dungeonrunner.utils.MusicBox;
 import com.mullen.ethan.dungeonrunner.utils.Utils;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
 
@@ -138,18 +137,20 @@ public class DungeonCommands implements CommandExecutor {
 			sender.sendMessage(ChatColor.AQUA + "Clearing plot (this will cause lag).");
 			cube.fill(Material.AIR);
 			return true;
-		} else if(args.length == 1 && args[0].equalsIgnoreCase("test")) {
+		} else if(args.length == 1 && args[0].equalsIgnoreCase("qg")) {
 			if(!sender.isOp()) {
 				sender.sendMessage(ChatColor.RED + "You must be op to execute this command.");
 				return true;
 			}
-			Player p = (Player) sender;
-			MusicBox.LARGE_WIN.playSong(main, p.getLocation(), 1);
+			GeneratorSettings settings = new GeneratorSettings("cave", 10, 12);
+			Dungeon dungeon = new Dungeon(main, settings);
+			dungeon.generate(true);
+			main.setCurrentDungeon(dungeon);
+			return true;
 		} else {
 			sender.sendMessage(ChatColor.RED + "Failed to parse command.");
 			return true;
 		}
-		return false;
 	}
 
 }

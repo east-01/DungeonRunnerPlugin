@@ -26,6 +26,7 @@ import com.mullen.ethan.dungeonrunner.dungeons.DungeonDoor;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureType;
 import com.mullen.ethan.dungeonrunner.events.DungeonRoomClearEvent;
+import com.mullen.ethan.dungeonrunner.events.DungeonRoomPopulateEvent;
 import com.mullen.ethan.dungeonrunner.hordes.Horde;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
@@ -82,8 +83,8 @@ public class RoomManager {
 				Location loc = p.getLocation();
 				if(cube.contains((float)loc.getX(), (float)loc.getY(), (float)loc.getZ())) {
 					populate();
+					break;
 				}
-				break;
 			}		
 		}
 		
@@ -108,6 +109,8 @@ public class RoomManager {
 		this.roomPopulated = true;
 		this.roomsMobs = new ArrayList<Entity>();
 						
+		dungeon.addDiscoveredRoom(this);
+		
 		if(room.getStructureData().getStructureType() == StructureType.BOSS_ROOM) {
 			spawnBoss();
 		} else if(isMobRoom()) {
@@ -121,6 +124,9 @@ public class RoomManager {
 			}
 		}
 
+		DungeonRoomPopulateEvent event = new DungeonRoomPopulateEvent(this);
+		Bukkit.getPluginManager().callEvent(event);
+		
 	}
 	
 	public void spawnMobs() {
@@ -218,6 +224,11 @@ public class RoomManager {
 		return room;
 	}
 	
+	public boolean hasMobs() {
+		if(roomsMobs == null) return false;
+		return roomsMobs.size() > 0;
+	}
+	
 	public List<DungeonDoor> getRoomsDoors() {
 		return roomsDoors;
 	}
@@ -229,5 +240,8 @@ public class RoomManager {
 	public boolean isCleared() {
 		return isCleared;
 	}
+	
+	public Vector3 getLocation() { return room.getLocation(); }
+	public Vector3 getSize() { return room.getStructureData().getSize(); }
 	
 }

@@ -1,5 +1,8 @@
 package com.mullen.ethan.dungeonrunner.dungeons.managers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,12 +28,14 @@ public class DungeonLifecycleManager implements Listener {
 	private Main main;
 	private Dungeon dungeon;
 	
+	private List<RoomManager> discoveredRooms;
 	private int roomsToComplete;
 	private int roomsCompleted;
 	
 	public DungeonLifecycleManager(Main main, Dungeon dungeon) {
 		this.main = main;
 		this.dungeon = dungeon;
+		this.discoveredRooms = new ArrayList<RoomManager>();
 		this.roomsCompleted = 0;
 		Bukkit.getPluginManager().registerEvents(this, main);
 	}
@@ -90,6 +95,14 @@ public class DungeonLifecycleManager implements Listener {
 		for(RoomManager rm : dungeon.getRoomManagers()) {
 			if(rm.isMobRoom()) roomsToComplete += 1;
 		}
+	}
+	
+	public List<RoomManager> getDiscoveredRooms() {
+		return discoveredRooms;
+	}
+	
+	public void addDiscoveredRoom(RoomManager rm) {
+		discoveredRooms.add(rm);
 	}
 	
 }

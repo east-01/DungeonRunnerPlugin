@@ -5,15 +5,21 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.map.MapRenderer;
+import org.bukkit.map.MapView;
 
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
+import com.mullen.ethan.dungeonrunner.maps.DungeonMapRenderer;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -39,6 +45,22 @@ public class DungeonPlayerManager implements Listener {
 		
 		p.teleport(dungeon.getStartLocation());
 		players.add(p);
+
+		// Give player a map
+		MapView view = Bukkit.createMap(main.getDungeonWorld());
+		// Clear other map renderers
+		for(MapRenderer renderer : view.getRenderers()) {
+			view.removeRenderer(renderer);
+		}
+		DungeonMapRenderer renderer = new DungeonMapRenderer(main);
+		dungeon.addMapRenderer(renderer);
+		view.addRenderer(renderer);
+		ItemStack mapItem = new ItemStack(Material.FILLED_MAP);
+		MapMeta meta = (MapMeta) mapItem.getItemMeta();
+		meta.setMapView(view);
+		mapItem.setItemMeta(meta);
+		
+		p.getInventory().addItem(mapItem);
 		
 		p.sendMessage(ChatColor.AQUA + "Joined dungeon, use \"/dungeon leave\" to get out.");
 		
