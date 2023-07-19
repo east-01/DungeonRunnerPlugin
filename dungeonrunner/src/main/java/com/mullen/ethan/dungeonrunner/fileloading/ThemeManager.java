@@ -79,13 +79,13 @@ public class ThemeManager {
 			return false;
 		}
 
-		String materialString = config.getString("doormaterial");
+		String doorMaterialString = config.getString("doormaterial");
 		try {
-			Material material = Material.valueOf(materialString.toUpperCase());
+			Material material = Material.valueOf(doorMaterialString.toUpperCase());
 			theme.setDoorMaterial(material);
 		} catch(Exception e) {
 			Bukkit.getLogger().log(Level.SEVERE, "Failed to load config for theme \"" + subFolder.getName() + "\"");	
-			Bukkit.getLogger().log(Level.SEVERE, "Material string \"" + materialString + "\" unrecognized.");	
+			Bukkit.getLogger().log(Level.SEVERE, "Material string \"" + doorMaterialString + "\" unrecognized.");	
 			return false;
 		}
 		
@@ -104,7 +104,19 @@ public class ThemeManager {
 				theme.addHordes(type, hordes);
 			}
 		} 
-		
+
+		if(config.contains("materials")) {
+			for(String materialString : config.getStringList("materials")) {
+				try {
+					theme.addMaterial(Material.valueOf(materialString.toUpperCase()));
+				} catch(Exception e) {
+					Bukkit.getLogger().log(Level.SEVERE, "Failed to load config for theme \"" + subFolder.getName() + "\"");	
+					Bukkit.getLogger().log(Level.SEVERE, "Material type \"" + materialString + "\" unrecognized.");	
+					return false;
+				}
+			}
+		} 
+
 		return true;
 		
 	}

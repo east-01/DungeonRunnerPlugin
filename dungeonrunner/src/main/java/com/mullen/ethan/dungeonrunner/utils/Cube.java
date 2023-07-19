@@ -136,19 +136,36 @@ public class Cube {
 	}
 
 	public boolean isEmpty() {
-		if(world == null) {
+		if (world == null) {
 			System.err.println("Failed to test for empty because world is null.");
 			return true;
 		}
-		for(int x = startX; x <= endX; x++) {
-			for(int y = startY; y <= endY; y++) {
-				for(int z = startZ; z <= endZ; z++) {
-					if(new Location(world, x, y, z).getBlock().getType() != Material.AIR) return false;					
+		for (int x = startX; x <= endX; x++) {
+			for (int y = startY; y <= endY; y++) {
+				for (int z = startZ; z <= endZ; z++) {
+					if (new Location(world, x, y, z).getBlock().getType() != Material.AIR)
+						return false;
 				}
 			}
 		}
-		return true;		
+		return true;
+	}
+
+	public boolean isNonSolid() {
+		if (world == null) {
+			System.err.println("Failed to test for empty because world is null.");
+			return true;
 		}
+		for (int x = startX; x <= endX; x++) {
+			for (int y = startY; y <= endY; y++) {
+				for (int z = startZ; z <= endZ; z++) {
+					if (new Location(world, x, y, z).getBlock().getType().isSolid())
+						return false;
+				}
+			}
+		}
+		return true;
+	}
 
 	public boolean isEmpty(List<Cube> whitelist) {
 		if(world == null) {

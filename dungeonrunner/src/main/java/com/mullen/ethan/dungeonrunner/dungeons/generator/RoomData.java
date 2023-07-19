@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
@@ -155,13 +154,24 @@ public class RoomData implements Cloneable {
 		}
 		return chestLocations;
 	}
-	
+
+	public List<Vector3> getTeleporterLocations() {
+		// Need to rotate the teleporter locations before we return them
+		List<Vector3> teleporterLocations = new ArrayList<Vector3>();
+		for(Vector3 originalLoc : structureData.getTeleporterLocations()) {
+			Vector3 newLoc = originalLoc.clone();
+			newLoc.rotate(rotation);
+			teleporterLocations.add(newLoc);
+		}
+		return teleporterLocations;
+	}
+
 	public Vector3 getDesireableSpawnLocation(int height) {
 		Cube roomCube = getCube();
 		for(int attempt = 0; attempt < 300; attempt++) {
 			int spawnX = roomCube.getStartX() + rand.nextInt(roomCube.getEndX()-roomCube.getStartX());
 			int spawnZ = roomCube.getStartZ() + rand.nextInt(roomCube.getEndZ()-roomCube.getStartZ());
-			Vector3 spawnLoc = getDesireableSpawnLocation(height, spawnX, spawnZ);
+			Vector3 spawnLoc = findFloorSpace(height, spawnX, spawnZ);
 			if(spawnLoc != null) {
 				return spawnLoc.add(new Vector3(0.5f, 0.1f, 0.5f));
 			}
@@ -169,7 +179,7 @@ public class RoomData implements Cloneable {
 		return null;
 	}
 	
-	public Vector3 getDesireableSpawnLocation(int height, float worldX, float worldZ) {
+	public Vector3 findFloorSpace(int height, float worldX, float worldZ) {
 		Cube roomCube = getCube();
 		// Start at maxHeight-height, because this is the first possible location that a mob can spawn
 		for(int spawnY = roomCube.getEndY()-height; spawnY > roomCube.getStartY(); spawnY--) {
@@ -177,13 +187,12 @@ public class RoomData implements Cloneable {
 			Cube zombieSpace = new Cube(new Vector3(worldX, spawnY, worldZ), new Vector3(worldX, spawnY+height, worldZ));
 			zombieSpace.setWorld(main.getDungeonWorld());
 			// If the space is empty and the block below is solid
-			boolean isValidSpot = zombieSpace.isEmpty() && new Vector3(worldX, spawnY-1, worldZ).getWorldLocation(main.getDungeonWorld()).getBlock().getType() != Material.AIR;
+			boolean isValidSpot = zombieSpace.isNonSolid() && new Vector3(worldX, spawnY-1, worldZ).getWorldLocation(main.getDungeonWorld()).getBlock().getType().isSolid();
 			if(!isValidSpot) continue;
 			
 			boolean hasCeiling = false;
 			for(int yOffset = 0; yOffset <= roomCube.getEndY()-spawnY; yOffset++) {
-				boolean isSolidBlock = new Vector3(worldX, spawnY+yOffset, worldZ).getWorldLocation(main.getDungeonWorld()).getBlock().getType() != Material.AIR;
-				if(isSolidBlock) {
+				if(new Vector3(worldX, spawnY+yOffset, worldZ).getWorldLocation(main.getDungeonWorld()).getBlock().getType().isSolid()) {
 					hasCeiling = true;
 					break;
 				}
@@ -194,6 +203,11 @@ public class RoomData implements Cloneable {
 			
 		}
 		return null;
+	}
+	
+	public Vector3 centerRoomFloor(int height) {
+		Vector3 center = getCube().getCenter();
+		return findFloorSpace(height, center.x, center.z);
 	}
 	
 }

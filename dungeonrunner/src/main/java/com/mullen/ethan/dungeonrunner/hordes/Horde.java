@@ -9,6 +9,8 @@ public class Horde {
 
 	private Random rand;
 	
+	private String name;
+	
 	private HashMap<String, Integer> maxAmt;
 	private HashMap<String, Integer> minAmt;
 	private HashMap<String, Integer> weights; 
@@ -16,8 +18,10 @@ public class Horde {
 	// A summation of the minAmt and maxAmt hash maps
 	private int minimumMobCount, maximumMobCount;
 	
-	public Horde() {
+	public Horde(String name) {
 		this.rand = new Random();
+		
+		this.name = name;
 		this.maxAmt = new HashMap<String, Integer>();
 		this.minAmt = new HashMap<String, Integer>();
 		this.weights = new HashMap<String, Integer>();
@@ -83,14 +87,21 @@ public class Horde {
 			int currentWeight = 0;
 			for(String id : eligibleIDs) {
 				currentWeight += weights.get(id);
-				if(currentWeight > roll) {
+				if(currentWeight >= roll) {
 					rolledID = id;
 					break;
 				}
 			}
+			if(rolledID == null) {
+				rolledID = eligibleIDs.get(rand.nextInt(eligibleIDs.size()));
+			}
 			
 			// Increment the count of this mob
-			counts.put(rolledID, counts.get(rolledID) + 1);
+			if(counts.containsKey(rolledID)) {
+				counts.put(rolledID, counts.get(rolledID) + 1);
+			} else {
+				counts.put(rolledID, 1);
+			}
 			
 			// If we've reached the maximum amount, remove it from eligibility
 			if(counts.get(rolledID) >= maxAmt.get(rolledID)) {
@@ -101,6 +112,10 @@ public class Horde {
 
 		return counts;
 		
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 }

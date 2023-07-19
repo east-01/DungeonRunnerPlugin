@@ -5,10 +5,13 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
 
 import com.mullen.ethan.dungeonrunner.Main;
+import com.mullen.ethan.dungeonrunner.startwell.QueueRoom;
 
 public class DungeonWorldManager {
 
@@ -23,7 +26,7 @@ public class DungeonWorldManager {
 		world = Bukkit.getWorld(DUNGEON_WORLD_NAME);
 
 		if(world == null) {
-			System.out.println("Dungeon world not found, generating...");
+			main.getLogger().info("Dungeon world not found. Generating...");
 			world = generateWorld();
 		}
 
@@ -57,6 +60,17 @@ public class DungeonWorldManager {
 	    world.setGameRule(GameRule.MOB_GRIEFING, false);
 	    world.setGameRule(GameRule.DO_MOB_LOOT, false);
 	    return world;
+	}
+
+	/**
+	 * Clears on-floor items that aren't in the queue room
+	 */
+	public void clearDungeonItems() {
+		for(Entity e : main.getDungeonWorld().getEntities()) {
+			if(e.getType() != EntityType.DROPPED_ITEM) continue;
+			if(e.getLocation().getY() < QueueRoom.MAX_HEIGHT) continue; // Items under the max height of the queue room are safe
+			e.remove();
+		}
 	}
 
 	public World getWorld() {

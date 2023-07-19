@@ -1,0 +1,97 @@
+		for(int i = 0; i < lootTables.length; i++) {
+			lootTables[i] = new LootTable(main);
+		}
+		
+		lootTables[0].addEntry(Material.ROTTEN_FLESH, 15, 2, 20);
+		lootTables[0].addEntry(Material.STRING, 15, 1, 5);
+		lootTables[0].addEntry(Material.GUNPOWDER, 10, 1, 5);
+		lootTables[0].addEntry(Material.ROTTEN_FLESH, 10, 2, 20);
+		lootTables[0].addEntry(Material.CARROT, 8, 1, 3);
+		lootTables[0].addEntry(Material.POTATO, 7, 1, 5);
+		lootTables[0].addEntry(Material.BREAD, 5, 3, 7);
+		lootTables[0].addEntry(Material.COOKED_CHICKEN, 5, 1, 5);
+		lootTables[0].addEntry(Material.COOKED_PORKCHOP, 5, 1, 5);
+		lootTables[0].addEntry(Material.COOKED_BEEF, 5, 1, 5);
+		lootTables[0].addEntry(Material.STICK, 5, 5, 10);
+		lootTables[0].addEntry(Material.COAL, 5, 1, 5);
+		lootTables[0].addEntry(Material.ARROW, 5, 1, 10);
+
+		lootTables[1].addEntry(Material.STRING, 13, 1, 5);
+		lootTables[1].addEntry(Material.GUNPOWDER, 10, 1, 5);
+		lootTables[1].addEntry(Material.CARROT, 10, 5, 10);
+		lootTables[1].addEntry(Material.POTATO, 10, 5, 12);
+		lootTables[1].addEntry(Material.BREAD, 10, 5, 12); // 40
+		lootTables[1].addEntry(Material.COOKED_PORKCHOP, 8, 3, 10);
+		lootTables[1].addEntry(Material.COOKED_BEEF, 7, 3, 10);
+		lootTables[1].addEntry(Material.MELON_SLICE, 5, 5, 20);
+		lootTables[1].addEntry(Material.STICK, 5, 5, 15);
+		lootTables[1].addEntry(Material.APPLE, 5, 3, 10);// 85
+		lootTables[1].addEntry(Material.REDSTONE, 5, 7, 20);
+		lootTables[1].addEntry(Material.WOODEN_AXE, 3);
+		lootTables[1].addEntry(Material.COAL, 3, 7, 15);
+		lootTables[1].addEntry(Material.ARROW, 3, 7, 15);
+		lootTables[1].addEntry(Material.WOODEN_SWORD, 3);
+		
+		lootTables[2].addEntry(Material.BREAD, 15, 10, 20);
+		lootTables[2].addEntry(Material.COOKED_PORKCHOP, 15, 8, 15);
+		lootTables[2].addEntry(Material.COOKED_BEEF, 10, 8, 15);
+		lootTables[2].addEntry(Material.APPLE, 10, 8, 20);
+		lootTables[2].addEntry(Material.WOODEN_SWORD, 8);
+		lootTables[2].addEntry(Material.COAL, 7, 10, 15);
+		lootTables[2].addEntry(Material.ARROW, 5, 10, 20);
+		lootTables[2].addEntry(Material.GOLDEN_CARROT, 5, 5, 10);
+		lootTables[2].addEntry(Material.STONE_AXE, 5);
+		lootTables[3].addEntry(Material.LEATHER_BOOTS, 2);
+		lootTables[3].addEntry(Material.LEATHER_LEGGINGS, 2);
+		lootTables[3].addEntry(Material.LEATHER_CHESTPLATE, 2);
+		lootTables[3].addEntry(Material.LEATHER_HELMET, 2);
+		lootTables[2].addEntry(Material.GLOWSTONE_DUST, 5, 5, 10);
+		lootTables[2].addEntry(Material.STONE_SWORD, 4);
+		lootTables[2].addEntry(Material.BOW, 3);
+
+		lootTables[3].addEntry(Material.COOKED_PORKCHOP, 15, 5, 20);
+		lootTables[3].addEntry(Material.COOKED_BEEF, 15, 5, 15);
+		lootTables[3].addEntry(Material.STONE_AXE, 10);
+		lootTables[3].addEntry(Material.ARROW, 10, 2, 20);
+		lootTables[3].addEntry(Material.LEATHER_BOOTS, 2);
+		lootTables[3].addEntry(Material.LEATHER_LEGGINGS, 2);
+		lootTables[3].addEntry(Material.LEATHER_CHESTPLATE, 2);
+		lootTables[3].addEntry(Material.LEATHER_HELMET, 2);
+		lootTables[3].addEntry(Material.STONE_SWORD, 7);
+		lootTables[3].addEntry(Material.GOLD_INGOT, 5, 3, 10);
+		lootTables[3].addEntry(Material.BOW, 5);
+		lootTables[3].addEntry(Material.CHAINMAIL_BOOTS, 2);
+		lootTables[3].addEntry(Material.CHAINMAIL_LEGGINGS, 2);
+		lootTables[3].addEntry(Material.CHAINMAIL_CHESTPLATE, 2);
+		lootTables[3].addEntry(Material.CHAINMAIL_HELMET, 2);
+		lootTables[3].addEntry(Material.SLIME_BALL, 5, 1, 5);
+		lootTables[3].addEntry("FREEZE_POTION", 5);
+		lootTables[3].addEntry(createArrow(PotionType.INSTANT_HEAL), 3, 5, 10);
+		lootTables[3].addEntry(createArrow(PotionType.SLOWNESS), 2, 5, 10);
+		lootTables[3].addEntry(createArrow(PotionType.REGEN), 1, 5, 10);
+		lootTables[3].addEntry(Material.GOLDEN_AXE, 3);
+		lootTables[3].addEntry(Material.GOLDEN_SWORD, 2);
+
+		lootTables[4].addEntry(Material.COOKED_PORKCHOP, 13, 5, 20);
+		lootTables[4].addEntry(Material.COOKED_BEEF, 10, 5, 20);
+		lootTables[4].addEntry(Material.STONE_AXE, 10);
+		lootTables[4].addEntry(Material.STONE_SWORD, 10);
+		lootTables[4].addEntry(Material.GOLD_INGOT, 10, 5, 10); // 40
+		lootTables[4].addEntry(Material.BOW, 8);
+		lootTables[4].addEntry(Material.CHAINMAIL_BOOTS, 2);
+		lootTables[4].addEntry(Material.CHAINMAIL_LEGGINGS, 2);
+		lootTables[4].addEntry(Material.CHAINMAIL_CHESTPLATE, 2);
+		lootTables[4].addEntry(Material.CHAINMAIL_HELMET, 2);
+		lootTables[4].addEntry(Material.IRON_INGOT, 5, 5, 20);
+		lootTables[4].addEntry(Material.IRON_AXE, 5);
+		lootTables[4].addEntry(Material.SHIELD, 5);// 85
+		lootTables[4].addEntry("FREEZE_POTION", 5);
+		lootTables[4].addEntry(Material.IRON_BOOTS, 2);
+		lootTables[4].addEntry(Material.IRON_LEGGINGS, 2);
+		lootTables[4].addEntry(Material.IRON_CHESTPLATE, 2);
+		lootTables[4].addEntry(Material.IRON_HELMET, 2);
+		lootTables[4].addEntry(createArrow(PotionType.INSTANT_HEAL), 1, 10, 20);
+		lootTables[4].addEntry(createArrow(PotionType.SLOWNESS), 1, 10, 20);
+		lootTables[4].addEntry(createArrow(PotionType.REGEN), 1, 10, 20);
+		lootTables[4].addEntry(Material.GOLDEN_APPLE, 3, 1, 3);
+		lootTables[4].addEntry(Material.ENDER_PEARL, 3, 1, 3);

@@ -1,15 +1,63 @@
 package com.mullen.ethan.dungeonrunner.utils;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Random;
 
+import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.RoomManager;
+import com.mullen.ethan.dungeonrunner.fileloading.DungeonTheme;
 
 public class Utils {
 
+	public static DungeonTheme pickTheme(HashMap<DungeonTheme, Integer> themeWeights) {
+		int totalWeight = 0;
+		for(DungeonTheme theme : themeWeights.keySet()) {
+			totalWeight += themeWeights.get(theme);
+		}
+		int randomWeight = new Random().nextInt(totalWeight) + 1;
+
+		for(DungeonTheme theme : themeWeights.keySet()) {
+			randomWeight -= themeWeights.get(theme);
+			if (randomWeight <= 0) {
+				return theme;
+			}
+		}
+		return null;
+	}
+	
+	public static int findRandomOpenSlot(Inventory inv) {
+		Random rand = new Random();
+		int slot = -1;
+		for(int slotAttempt = 0; slotAttempt <= 100; slotAttempt++) {
+			int testSlot = rand.nextInt(inv.getSize());
+			ItemStack item = inv.getItem(testSlot);
+			if(item == null || item.getType() == Material.AIR) {
+				slot = testSlot;
+				break;
+			}
+		}
+		if(slot == -1) { // Safety measure incase we somehow cant find a slot
+			slot = Utils.findOpenSlot(inv);
+		}
+		return slot;
+	}
+	
+	public static int findOpenSlot(Inventory inv) {
+		for(int i = 0; i < inv.getSize(); i++) {
+			if(inv.getItem(i) == null || inv.getItem(i).getType() == Material.AIR) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 	public static Cube getDungeonBounds(Dungeon d) {
 		int minX = Integer.MAX_VALUE;
 		int minY = Integer.MAX_VALUE;

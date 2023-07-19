@@ -269,7 +269,10 @@ public class DungeonGenerator {
 		if(fatalErrorFlag) return;
 		
 		// Remove keyword signs
-		for(Vector3 doorOffset : data.getDoorLocations()) {
+		List<Vector3> offsetsToRemove = new ArrayList<>();
+		offsetsToRemove.addAll(data.getDoorLocations());
+		offsetsToRemove.addAll(data.getTeleporterLocations());
+		for(Vector3 doorOffset : offsetsToRemove) {
 			Vector3 worldLoc = new Vector3(data.getLocation().x + doorOffset.x, data.getLocation().y + doorOffset.y, data.getLocation().z + doorOffset.z);
 			Block targBlock = worldLoc.getWorldLocation(main.getDungeonWorld()).getBlock();
 			if(targBlock.getType() != Material.OAK_SIGN) continue;
@@ -293,7 +296,7 @@ public class DungeonGenerator {
 			cube.setWorld(main.getDungeonWorld());
 			cube.fill(main.getThemeManager().getTheme(settings.getTheme()).getDoorMaterial());
 		}
-
+		
 		// Make recursive call
 		for(RoomData child : data.getChildren()) {
 			postProcessRooms(child);

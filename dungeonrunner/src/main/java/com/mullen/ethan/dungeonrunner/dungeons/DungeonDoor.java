@@ -45,6 +45,7 @@ public class DungeonDoor implements Listener {
 	private Cube cube;
 	private int timer;
 	private boolean locked;
+	private boolean hasBeenOpened;
 	
 	public DungeonDoor(Main main, RoomManager room, Location doorLocation, boolean isWest, boolean isLocked) {
 		this.main = main;
@@ -71,6 +72,8 @@ public class DungeonDoor implements Listener {
 	public void close(boolean animated) { setOpen(animated, false); }
 	public void setOpen(boolean animated, boolean open) {
 		if(animated) doorLocation.getWorld().playSound(doorLocation, open ? Sound.BLOCK_WOODEN_DOOR_OPEN : Sound.BLOCK_WOODEN_DOOR_CLOSE, 0.8f, 0.45f);
+		
+		if(open) hasBeenOpened = true;
 		
 		// Animation frame, should be the height of the door
 		Material mat = open ? Material.AIR : dungeon.getDungeonTheme().getDoorMaterial();
@@ -157,6 +160,14 @@ public class DungeonDoor implements Listener {
 	
 	public boolean isLocked() {
 		return locked;
+	}
+	
+	public boolean hasBeenOpened() {
+		return hasBeenOpened;
+	}
+	
+	public Location getLocation() {
+		return doorLocation;
 	}
 	
 }

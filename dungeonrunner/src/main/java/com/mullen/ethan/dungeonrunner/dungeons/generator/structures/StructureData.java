@@ -14,13 +14,15 @@ public class StructureData {
 	private Vector3 size;
 	private List<Vector3> doorLocations;
 	private List<Vector3> chestLocations;
+	private List<Vector3> teleporterLocations;
 	private StructureType structureType;
 
-	public StructureData(File file, Vector3 size, List<Vector3> doorLocations, List<Vector3> chestLocations) {
+	public StructureData(File file, Vector3 size, List<Vector3> doorLocations, List<Vector3> chestLocations, List<Vector3> teleporterLocations) {
 		this.file = file;
 		this.size = size;
 		this.doorLocations = doorLocations;
 		this.chestLocations = chestLocations;
+		this.teleporterLocations = teleporterLocations;
 		
 		String parentName = file.getParentFile().getName().toUpperCase();
 		try {
@@ -31,7 +33,7 @@ public class StructureData {
 	}
 
 	public StructureData(File file) {
-		this(file, new Vector3(), new ArrayList<Vector3>(), new ArrayList<Vector3>());
+		this(file, new Vector3(), new ArrayList<Vector3>(), new ArrayList<Vector3>(), new ArrayList<Vector3>());
 	}
 	
 	public StructureData clone() {
@@ -41,9 +43,13 @@ public class StructureData {
 		}
 		List<Vector3> chestsCopy = new ArrayList<Vector3>();
 		for(Vector3 chest : chestLocations) {
-			chestsCopy.add(chest);
+			chestsCopy.add(chest.clone());
 		}
-		return new StructureData(file, size.clone(), doorsCopy, chestsCopy);
+		List<Vector3> teleportersCopy = new ArrayList<Vector3>();
+		for(Vector3 teleporter: teleporterLocations) {
+			teleportersCopy.add(teleporter.clone());
+		}
+		return new StructureData(file, size.clone(), doorsCopy, chestsCopy, teleportersCopy);
 	}
 		
 	public File getFile() {
@@ -93,7 +99,23 @@ public class StructureData {
 	public void addChestLocation(Vector3 offset) {
 		chestLocations.add(offset);
 	}
+
+	public List<Vector3> getTeleporterLocations() {
+		return teleporterLocations;
+	}
+
+	public void setTeleporterLocations(List<Vector3> teleporterLocations) {
+		this.teleporterLocations = teleporterLocations;
+	}
 	
+	public void addTeleporterlocation(int x, int y, int z) {
+		teleporterLocations.add(new Vector3(x, y, z));
+	}
+
+	public void addTeleporterLocation(Vector3 offset) {
+		teleporterLocations.add(offset);
+	}
+
 	public StructureType getStructureType() {
 		return structureType;
 	}

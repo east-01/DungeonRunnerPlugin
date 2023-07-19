@@ -12,28 +12,30 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.mullen.ethan.custommobs.CustomMobs;
+import com.mullen.ethan.customforge.CustomForge;
 import com.mullen.ethan.dungeonrunner.commands.DungeonCommands;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
-import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
-import com.mullen.ethan.dungeonrunner.dungeons.loot.TieredLootTable;
+import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableManager;
 import com.mullen.ethan.dungeonrunner.dungeons.managers.DungeonWorldManager;
 import com.mullen.ethan.dungeonrunner.fileloading.FileLoader;
 import com.mullen.ethan.dungeonrunner.fileloading.ThemeManager;
 import com.mullen.ethan.dungeonrunner.hordes.HordeManager;
+import com.mullen.ethan.dungeonrunner.items.DungeonItemLoader;
+import com.mullen.ethan.dungeonrunner.startwell.DungeonTome;
 import com.mullen.ethan.dungeonrunner.startwell.QueueRoom;
 import com.mullen.ethan.dungeonrunner.startwell.StartWell;
+import com.mullen.ethan.dungeonrunner.teleporter.TeleporterManager;
 
 /*
- * - You jump into the well to get into the dungeon start room, in this room is a single portal which will get you into the dungeons
- *     - Kinda like a hub world
- * - In the dungeon room you can craft a dungeon by throwing items in which will influence the generation of the dungeon
- *     - Possibly can determine seed from combination of items thrown in
- * - Once a dungeon is generated the portal will open and all of the people in the hub room can go in
+ * DungeonRunner TODO:
+ * - Teleporters:
+ *    - Air cloud, like return teleporter in queueroom
+ *    - Has a custom name, top row: ChatColor.AQUA + "Teleporter" bottom row: ChatColor.GRAY + "<Destination>"
+ *    - Dungeon boss room has a to-start teleporter, dungeon start room has an exit teleporter
  */
 // Thanks https://github.com/Shynixn/StructureBlockLib
 public class Main extends JavaPlugin {
-
+	
 	private FileLoader fileLoader;
 	
 	private DungeonWorldManager dungeonWorldManager;
@@ -43,11 +45,13 @@ public class Main extends JavaPlugin {
 	private ThemeManager themeManager;
 	private HordeManager hordeManager;
 	
-	private CustomMobs customBosses;
-	private TieredLootTable lootTable;
+	private CustomForge customForge;
+	private LootTableManager lootTableManager;
+	private TeleporterManager teleporterManager;
 	
 	private QueueRoom queueRoom;
 	private StartWell startingWell;
+	private DungeonTome dungeonTome;
 	
 	@Override
 	public void onEnable() {
@@ -55,24 +59,31 @@ public class Main extends JavaPlugin {
 		
 		this.dungeonWorldManager = new DungeonWorldManager(this);
 		this.dungeonCommands = new DungeonCommands(this);
-			
-		getCommand("dungeon").setExecutor(dungeonCommands);
-	
+					
 		this.themeManager = new ThemeManager(this);
 		this.hordeManager = new HordeManager(this);
 		
-		this.customBosses = (CustomMobs) getServer().getPluginManager().getPlugin("CustomMobs");
-		this.lootTable = LootTableGenerator.getTieredLootTable();
-				
+		this.customForge = (CustomForge) getServer().getPluginManager().getPlugin("CustomForge");
+		
+		DungeonItemLoader.loadItemsAndRecipes(this);
+		
+		this.lootTableManager = new LootTableManager(this);
+		this.teleporterManager = new TeleporterManager(this);
+		
 		this.queueRoom = new QueueRoom(this);
 		this.startingWell = new StartWell(this);
-						
+		this.dungeonTome = new DungeonTome(this);
+				
+		getCommand("dungeon").setExecutor(dungeonCommands);
+		
 	}
 
 	@Override
 	public void onDisable() {
 
 		if(currentDungeon != null) currentDungeon.close();
+		startingWell.clearInsideWell();
+		teleporterManager.clearTeleporters();
 		
 	}
 
@@ -123,24 +134,28 @@ public class Main extends JavaPlugin {
 	
 	public HordeManager getHordeManager() { return hordeManager; }
 	
-	public CustomMobs getCustomBosses() {
-		return customBosses;
+	public CustomForge getCustomForge() {
+		return customForge;
 	}
 	
-	public TieredLootTable getLootTable() {
-		return lootTable;
+	public LootTableManager getLootTableManager() {
+		return lootTableManager;
 	}
-	
-	public void setLootTables(TieredLootTable newTable) {
-		this.lootTable = newTable;
-	}
-	
+		
 	public StartWell getStartWell() {
 		return startingWell;
 	}
 	
 	public QueueRoom getQueueRoom() {
 		return queueRoom;
+	}
+	
+	public DungeonTome getTome() {
+		return dungeonTome;
+	}
+
+	public TeleporterManager getTeleporterManager() {
+		return teleporterManager;
 	}
 	
 }

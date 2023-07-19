@@ -30,7 +30,7 @@ public class HordeManager {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Loading hordes...");
 
 		for(String hordeName : config.getConfigurationSection("").getKeys(false)) {
-			Horde horde = new Horde();
+			Horde horde = new Horde(hordeName);
 			boolean isValid = true;
 			for(String mobString : config.getStringList(hordeName)) {
 				String[] elements = mobString.split(", ");

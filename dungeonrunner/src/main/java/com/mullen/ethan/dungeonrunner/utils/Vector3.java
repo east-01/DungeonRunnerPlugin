@@ -13,6 +13,9 @@ public class Vector3 {
 		this.z = z;
 	}
 	public Vector3() {}
+	public Vector3(Location location) {
+		this((float)location.getX(), (float)location.getY(), (float)location.getZ());
+	}
 	@Override
 	public Vector3 clone() {
 		return new Vector3(x, y, z);

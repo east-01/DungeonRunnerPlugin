@@ -5,19 +5,13 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import com.mullen.ethan.custommobs.events.CustomMobDeathEvent;
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureType;
-import com.mullen.ethan.dungeonrunner.dungeons.loot.LootTableGenerator;
 import com.mullen.ethan.dungeonrunner.events.DungeonRoomClearEvent;
 import com.mullen.ethan.dungeonrunner.utils.MusicBox;
 
@@ -43,7 +37,6 @@ public class DungeonLifecycleManager implements Listener {
 	@EventHandler
 	public void onRoomComplete(DungeonRoomClearEvent event) {
 		
-		this.roomsCompleted += 1;
 		RoomData room = event.getClearedRoom().getRoomData();
 		boolean isBossRoom = event.getClearedRoom().getRoomData().getStructureData().getStructureType() == StructureType.BOSS_ROOM;
 		Location centerRoom = room.getCube().getCenter().getWorldLocation(main.getDungeonWorld());
@@ -51,10 +44,12 @@ public class DungeonLifecycleManager implements Listener {
 			MusicBox.SMALL_WIN.playSong(main, centerRoom, 1f);
 			event.getClearedRoom().unlockDoors();
 
-			// Means we've cleared all other rooms except boss door
-			if(roomsCompleted+1 == roomsToComplete) {
+			this.roomsCompleted += 1;
+
+			if(roomsCompleted == roomsToComplete) {
 				dungeon.sendActionBarMessage(ChatColor.GOLD + "" + ChatColor.ITALIC + "Room cleared! Boss door unlocked.");				
 				dungeon.getBossDoor().setLocked(false);
+				dungeon.updateScoreboardValues();
 			} else {
 				dungeon.sendActionBarMessage(ChatColor.GREEN + "" + ChatColor.ITALIC + "Room cleared!");								
 			}
@@ -64,34 +59,13 @@ public class DungeonLifecycleManager implements Listener {
 		}
 
 	}
-	
-	@EventHandler
-	public void onBossDeath(CustomMobDeathEvent event) {
-		if(!event.isBoss()) return;
-		Location deathLoc = event.getEntity().getLocation();
-		// Drop loot item 
-		// TODO: Make these more interesting
-		Item item = deathLoc.getWorld().dropItem(deathLoc.add(0, 1, 0), LootTableGenerator.getRandomMaxEnchantBook());
-		item.setPickupDelay(3*20);
-		new BukkitRunnable() {
-			public void run() {
-				if(item.isDead()) {
-					cancel();
-					return;
-				}
-				Location itemLoc = item.getLocation();
-				itemLoc.getWorld().spawnParticle(Particle.CRIT_MAGIC, itemLoc, 5);
-				if(itemLoc.getBlock().getType() == Material.AIR) itemLoc.getBlock().setType(Material.LIGHT);
-			}
-		}.runTaskTimer(main, 0L, 2L);
-	}
 
 	public float getProgress() {
 		return (float)roomsCompleted/(float)roomsToComplete;
 	}
 	
 	public void updateRoomsToComplete() {
-		this.roomsToComplete = 1; // Start with 1 to include the boss room
+		this.roomsToComplete = 0; // Start with 1 to include the boss room
 		for(RoomManager rm : dungeon.getRoomManagers()) {
 			if(rm.isMobRoom()) roomsToComplete += 1;
 		}

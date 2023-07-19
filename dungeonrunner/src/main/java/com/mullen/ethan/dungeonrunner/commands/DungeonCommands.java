@@ -12,6 +12,9 @@ import org.bukkit.entity.Player;
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.GeneratorSettings;
+import com.mullen.ethan.dungeonrunner.dungeons.generator.RoomData;
+import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureType;
+import com.mullen.ethan.dungeonrunner.dungeons.managers.RoomManager;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Utils;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
@@ -146,6 +149,37 @@ public class DungeonCommands implements CommandExecutor {
 			Dungeon dungeon = new Dungeon(main, settings);
 			dungeon.generate(true);
 			main.setCurrentDungeon(dungeon);
+			return true;
+		} else if(args.length == 1 && args[0].equalsIgnoreCase("test")) {
+			if(!sender.isOp()) {
+				sender.sendMessage(ChatColor.RED + "You must be op to execute this command.");
+				return true;
+			}
+			if(!(sender instanceof Player)) {
+				sender.sendMessage(ChatColor.RED + "You must be a player to execute this command.");
+				return true;
+			}
+			Dungeon dungeon = main.getCurrentDungeon();
+			if(dungeon == null) {
+				sender.sendMessage(ChatColor.RED + "Dungeon is null.");
+				return true;
+			}
+			Player p = (Player) sender;
+			RoomManager bossRoom = null;
+			for(RoomManager rm : dungeon.getRoomManagers()) {
+				if(rm.getType() != StructureType.BOSS_ROOM) continue;
+				bossRoom = rm;
+			}
+			if(bossRoom == null) {
+				sender.sendMessage(ChatColor.RED + "Couldn't find boss");
+				return true;
+			}
+			if(!dungeon.isPlayerInDungeon(p)) {
+				dungeon.addPlayer(p);
+			}
+			RoomData parent = bossRoom.getRoomData().getParent();
+			p.teleport(parent.getCube().getCenter().getWorldLocation(main.getDungeonWorld()));
+			dungeon.getBossDoor().setLocked(false);
 			return true;
 		} else {
 			sender.sendMessage(ChatColor.RED + "Failed to parse command.");

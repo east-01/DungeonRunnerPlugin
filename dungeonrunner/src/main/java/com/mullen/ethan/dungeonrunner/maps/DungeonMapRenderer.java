@@ -1,7 +1,5 @@
 package com.mullen.ethan.dungeonrunner.maps;
 
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -17,15 +15,18 @@ import com.mullen.ethan.dungeonrunner.dungeons.generator.DungeonGenerator;
 
 public class DungeonMapRenderer extends MapRenderer {
 
+	// The size of the "window" into the full map
+	public static int SIZE = 64;
+	
 	private Main main;
 	private DungeonMapDrawer drawer;
 	
 	// These variables will be loaded for every load() call
 	private BufferedImage image;
 	private int py;
-
-	private MapCursor focusCursor;
 		
+	private MapCursor focusCursor;
+	
 	public DungeonMapRenderer(Main main) {
 		this.main = main;
 		this.drawer = new DungeonMapDrawer(main);
@@ -33,37 +34,21 @@ public class DungeonMapRenderer extends MapRenderer {
 			
 	public void load(Player focus) {
 		if(main.getCurrentDungeon() == null) return;
-				
-		if(this.focusCursor == null) {
-			this.focusCursor = new MapCursor(
-	                (byte) 0,    // Unique ID for the cursor
-	                (byte) 0,    // X position on the map (will be calculated later)
-	                (byte) 0,    // Y position on the map (will be calculated later)
-	                MapCursor.Type.RED_POINTER, // Cursor type
-	                true       // True if the cursor is visible
-	        );
-		}
-		
+						
 		// Gets the master image. The drawer will load the image if necessary
-		BufferedImage masterImage = drawer.getMasterImage(py);
-		
-		// The size of the "window" into the full map
-		int size = 64;
-		
+		BufferedImage masterImage = drawer.getMasterImage();
+				
 		// The players coordinates in image space
 		int playerX = focus.getLocation().getBlockX() + DungeonGenerator.RADIUS;
 		int playerZ = focus.getLocation().getBlockZ() + DungeonGenerator.RADIUS;
 		
-		this.image = safeCrop(masterImage, playerX-(size/2), playerZ-(size/2), size);
+		this.image = safeCrop(masterImage, playerX-(SIZE/2), playerZ-(SIZE/2), SIZE);
 
 		// Expand to fill canvas
 		BufferedImage mapImage = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
 		mapImage.getGraphics().drawImage(this.image, 0, 0, 128, 128, null);
 		this.image = mapImage;
-		
-		Graphics g = this.image.getGraphics();
-		g.setColor(Color.RED);
-		
+				
 	}
 		
 	private int renderCounter;
@@ -74,21 +59,21 @@ public class DungeonMapRenderer extends MapRenderer {
 		
 		load(player);
 
-		MapCursorCollection cursors = canvas.getCursors();
-		if(focusCursor != null && cursors.size() == 0) {
+		if(focusCursor == null) {
+			MapCursorCollection cursors = new MapCursorCollection();
+			this.focusCursor = new MapCursor((byte)0, (byte)0, (byte)0, MapCursor.Type.WHITE_POINTER, true);
 			cursors.addCursor(focusCursor);
+			canvas.setCursors(cursors);
 		}
 
-        focusCursor.setX((byte) map.getCenterX());
-        focusCursor.setY((byte) map.getCenterZ());
-        double cursorYaw = (player.getLocation().getYaw() - 90.0) % 360.0;
+		double cursorYaw = (player.getLocation().getYaw() - 90.0) % 360.0;
         byte direction = (byte) Math.floor(cursorYaw / 22.5);
         if (direction < 0) {
             direction += 16;
         }		
         focusCursor.setDirection(direction);
-        
-		canvas.drawImage(0, 0, image);
+		        
+		canvas.drawImage(0, 0, rotate(image, -90));
 	}
 
 	private static BufferedImage rotate(BufferedImage bimg, double angle) {

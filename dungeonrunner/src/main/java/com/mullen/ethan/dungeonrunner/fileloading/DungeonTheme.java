@@ -15,12 +15,14 @@ public class DungeonTheme {
 	private HashMap<StructureType, List<File>> structures;
 	private Material doorMaterial;
 	private HashMap<StructureType, List<String>> hordes;
+	private List<Material> materials;
 	
 	public DungeonTheme(String name) {
 		this.name = name;
 		this.structures = new HashMap<StructureType, List<File>>();
 		this.doorMaterial = Material.STONE;
 		this.hordes = new HashMap<StructureType, List<String>>();
+		this.materials = new ArrayList<Material>();
 	}
 	
 	public String getName() {
@@ -67,6 +69,18 @@ public class DungeonTheme {
 	
 	public void addHordes(StructureType type, List<String> hordeNames) {
 		getHordes(type).addAll(hordeNames);
+	}
+	
+	public List<Material> getMaterials() {
+		return materials;
+	}
+	
+	public void setMaterials(List<Material> newList) {
+		this.materials = newList;
+	}
+	
+	public void addMaterial(Material newMaterial) {
+		this.materials.add(newMaterial);
 	}
 	
 }

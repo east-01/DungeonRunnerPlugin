@@ -17,9 +17,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.mullen.ethan.custommobs.CustomBoss;
-import com.mullen.ethan.custommobs.CustomMob;
-import com.mullen.ethan.custommobs.includedmobs.IncludedMobsRegister;
+import com.mullen.ethan.customforge.custommobs.MobData;
+import com.mullen.ethan.customforge.includedmobs.IncludedMobsRegister;
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.Dungeon;
 import com.mullen.ethan.dungeonrunner.dungeons.DungeonDoor;
@@ -146,47 +145,48 @@ public class RoomManager {
 			return;
 		}
 		
-		HashMap<String, Integer> countMap = possibleHordes.get(new Random().nextInt(possibleHordes.size())).generateRandomCountMap();
-		for(String id : countMap.keySet()) {
-			for(int i = 0; i < countMap.get(id); i++) {
-				Location spawnLoc = room.getDesireableSpawnLocation(3).getWorldLocation(main.getDungeonWorld());
-				 
-				// Check if the id is an EntityType enum
-				LivingEntity entity = null;
-				try {
-					EntityType type = EntityType.valueOf(id.toUpperCase());
-					entity = (LivingEntity) spawnLoc.getWorld().spawnEntity(spawnLoc, type);
-				} catch(Exception e) {}
-				
-				// Check if is registered
-				if(main.getCustomBosses().isCustomMobRegistered(id)) {
-					CustomMob mob = main.getCustomBosses().getInstance(id);
-					entity = mob.spawn(spawnLoc);
+		Horde selectedHorde = possibleHordes.get(new Random().nextInt(possibleHordes.size()));
+		try {
+			HashMap<String, Integer> countMap = selectedHorde.generateRandomCountMap();
+			for(String id : countMap.keySet()) {
+				for(int i = 0; i < countMap.get(id); i++) {
+					Location spawnLoc = room.getDesireableSpawnLocation(3).getWorldLocation(main.getDungeonWorld());
+					 
+					// Check if the id is an EntityType enum
+					LivingEntity entity = null;
+					try {
+						EntityType type = EntityType.valueOf(id.toUpperCase());
+						entity = (LivingEntity) spawnLoc.getWorld().spawnEntity(spawnLoc, type);
+					} catch(Exception e) {}
+					
+					// Check if is registered
+					if(main.getCustomForge().isMobDataRegistered(id)) {
+						MobData mob = main.getCustomForge().getMobData(id).getConstructor(Location.class).newInstance(spawnLoc);
+						entity = mob.getEntity();
+					}
+					
+					if(entity == null) {
+						Bukkit.getLogger().log(Level.SEVERE, "Failed to spawn mob with id \"" + id + "\"");
+						continue;
+					}
+					
+					addMob(entity);
+					
 				}
-				
-				if(entity == null) {
-					Bukkit.getLogger().log(Level.SEVERE, "Failed to spawn mob with id \"" + id + "\"");
-					continue;
-				}
-				
-				addMob(entity);
-				
 			}
+		} catch(Exception e) {
+			Bukkit.getLogger().log(Level.SEVERE, "Encountered error while spawning horde \"" + selectedHorde.getName() + "\"");
+			e.printStackTrace();
 		}
 		
 	}
 	
 	public void spawnBoss() {
-		List<String> bosses = Arrays.asList(IncludedMobsRegister.CM_EXALTED_BLAZE, 
-				IncludedMobsRegister.CM_EXALTED_WITHER_SKELETON, 
-				IncludedMobsRegister.CM_EXALTED_ZOMBIE, 
-				IncludedMobsRegister.CM_EXALTED_VINDICATOR, 
-				IncludedMobsRegister.CM_EXALTED_MAGMA_CUBE);
+		List<String> bosses = Arrays.asList(IncludedMobsRegister.CM_LIFESTEAL_ZOMBIE);
 		
 		String id = bosses.get(new Random().nextInt(bosses.size()));		
-		CustomBoss cb = (CustomBoss) main.getCustomBosses().getInstance(id);
 		Cube roomCube = room.getCube();
-		Vector3 spawnLoc = room.getDesireableSpawnLocation(3,  roomCube.getCenter().x, roomCube.getCenter().z);
+		Vector3 spawnLoc = room.findFloorSpace(3,  roomCube.getCenter().x, roomCube.getCenter().z);
 		// Means we couldn't find a locatio, add 1 to try again
 		if(spawnLoc == null) {
 			Bukkit.getLogger().log(Level.SEVERE, "Tried to spawn a boss in the center of \"" + room.getStructureData().getFile().getName() + ",\" but no suitable center was found.");
@@ -198,8 +198,12 @@ public class RoomManager {
 			p.playSound(spawnWorldLoc, Sound.ENTITY_WITHER_SPAWN, (float)0.8, (float)0.35);
 		}
 		
-		LivingEntity boss = cb.spawn(spawnWorldLoc);
-		addMob(boss);
+		try {
+			MobData bossData = main.getCustomForge().getMobData(id).getConstructor(Location.class).newInstance(spawnWorldLoc);
+			addMob(bossData.getEntity());
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -243,5 +247,6 @@ public class RoomManager {
 	
 	public Vector3 getLocation() { return room.getLocation(); }
 	public Vector3 getSize() { return room.getStructureData().getSize(); }
+	public StructureType getType() { return room.getStructureData().getStructureType(); }
 	
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -69,11 +70,20 @@ public class StructureManager {
 						boolean isReadableSign = b.getType() == Material.OAK_SIGN && (b.getState() instanceof Sign);
 						if(!isReadableSign) continue;
 						Sign s = (Sign) b.getState();
-						if(s.getSide(Side.FRONT).getLine(0).equalsIgnoreCase("door")) {
+						String targetLine = s.getSide(Side.FRONT).getLine(0);
+						if(targetLine.equalsIgnoreCase("door")) {
 							processedData.get(file).addDoorLocation(offset);
+						} else if(targetLine.equalsIgnoreCase("teleporter")) {
+							processedData.get(file).addTeleporterLocation(offset);							
 						}
 					}
 
+					if(processedData.get(file).getDoorLocations().size() == 0) {
+						Bukkit.getLogger().severe("Structure " + file.getName() + " has " + processedData.get(file).getDoorLocations().size() + " doors. Rooms need to have at least one door to be valid.");
+						processedData.remove(file);
+						return;
+					}
+										
 					for(Vector3 offset : chestOffsets) {
 						Location signLoc = new Location(main.getDungeonWorld(), offset.x, offset.y, offset.z);
 						Block b = signLoc.getBlock();
@@ -112,16 +122,20 @@ public class StructureManager {
 
 	public static void generateStructure(Main main, String name, Location loc, StructureRotation rotation, Runnable completionTask) {
 		Path filePath = main.getDataFolder().toPath().resolve(name + ".nbt");
+		generateStructure(main, filePath.toFile(), loc, rotation, completionTask);
+	}
+
+	public static void generateStructure(Main main, File file, Location loc, StructureRotation rotation, Runnable completionTask) {
 		StructureBlockLibApi.INSTANCE.loadStructure(main)
 				.at(loc)
 				.rotation(rotation)
-				.loadFromPath(filePath)
+				.loadFromPath(file.toPath())
 				.onException(e -> main.getLogger().log(Level.SEVERE, "Failed to load structure.", e))
 				.onResult(e -> {
 					if(completionTask != null) completionTask.run();
 				});
 	}
-	
+
 	public Vector3 getStructureSize(File file) {
 		try {
 			NBTFile nbtFile = new NBTFile(file);
