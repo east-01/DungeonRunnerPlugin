@@ -40,6 +40,9 @@ public class DungeonTheme {
 		return structures.get(type);
 	}
 	
+	/**
+	 * Gets all structures. Excludes structure types: START_ROOM and BOSS_ROOM
+	 */
 	public List<File> getRooms() {
 		List<File> rooms = new ArrayList<File>();
 		rooms.addAll(structures.get(StructureType.HALLWAY));

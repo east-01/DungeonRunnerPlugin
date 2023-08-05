@@ -1,5 +1,6 @@
 package com.mullen.ethan.dungeonrunner.dungeons.generator;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.bukkit.block.BlockFace;
 import com.github.shynixn.structureblocklib.api.enumeration.StructureRotation;
 import com.mullen.ethan.dungeonrunner.Main;
 import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureData;
+import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureType;
 import com.mullen.ethan.dungeonrunner.utils.Cube;
 import com.mullen.ethan.dungeonrunner.utils.Utils;
 import com.mullen.ethan.dungeonrunner.utils.Vector3;
@@ -101,6 +103,12 @@ public class RoomData implements Cloneable {
 
 	public HashMap<RoomData, Vector3> getChildrenMap() {
 		return children;
+	}
+	
+	public void removeChild(RoomData room) {
+		Vector3 associatedDoor = children.get(room);
+		closedDoors.remove(associatedDoor);
+		children.remove(room);
 	}
 	
 	public List<RoomData> getChildren() {
@@ -209,5 +217,8 @@ public class RoomData implements Cloneable {
 		Vector3 center = getCube().getCenter();
 		return findFloorSpace(height, center.x, center.z);
 	}
+	
+	public StructureType getType() { return structureData.getStructureType(); }
+	public File getFile() { return structureData.getFile(); }
 	
 }

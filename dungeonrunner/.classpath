@@ -18,6 +18,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="H:/Files/Servers/[1.19.4] DungeonRunner test server/plugins/CustomForge.jar"/>
+	<classpathentry kind="lib" path="C:/Users/mulle/Desktop/Files/Minecraft Servers/[1.20.1] DungeonRunner test server/plugins/CustomForge.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

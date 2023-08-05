@@ -1,13 +1,13 @@
 package com.mullen.ethan.dungeonrunner.dungeons.generator;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-
 import com.mullen.ethan.dungeonrunner.Main;
-import com.mullen.ethan.dungeonrunner.utils.Vector3;
+import com.mullen.ethan.dungeonrunner.dungeons.generator.structures.StructureType;
+import com.mullen.ethan.dungeonrunner.fileloading.DungeonTheme;
+import com.mullen.ethan.dungeonrunner.utils.WeightedList;
 
 public class DungeonGeneratorUtils {
 
@@ -21,49 +21,61 @@ public class DungeonGeneratorUtils {
 		this.generator = generator;
 	}
 	
-	public RoomData doTreeWalk(RoomData startRoom) {
+	public RoomData selectParentRoom(RoomData startRoom) {
 		// Do the tree walk
-		RoomData parentRoom = startRoom;
+		RoomData currentRoom = startRoom;
 		for(int j = 0; j < 1000; j++) {
-			List<RoomData> childRooms = parentRoom.getChildren();
-			// Choice to use the current room
-			boolean useRoom = generator.rand.nextBoolean();
-			if(parentRoom.getOpenDoors().size() == 0) {
-				useRoom = false;
-			} else if(childRooms.size() == 0) {
-				useRoom = true;
-			}
-
-			if(useRoom) {
-				break;
-			} else {
-				parentRoom = childRooms.get(generator.rand.nextInt(childRooms.size()));
-			}
+			// If there's no chilren, we have to use this room
+			if(currentRoom.getChildren().size() == 0) break;
+			
+			// Early-select random chance
+			boolean canUseRoom = currentRoom.getOpenDoors().size() > 0;
+			boolean earlyUse = generator.rand.nextBoolean();
+			if(canUseRoom && earlyUse) break;
+			
+			List<RoomData> childOptions = currentRoom.getChildren();
+			currentRoom = childOptions.get(generator.rand.nextInt(childOptions.size()));
+			
 		}
-		return parentRoom;
+		return currentRoom;
 	}
-
-	@Deprecated
-	public Vector3 findAvailableStartLocation() {
-		int plotX = -1;
-		int plotZ = -1;
-		for(int x = 0; x < 1000; x++) {
-			if (plotX != -1) break;
-			for(int z = 0; z < 1000; z++) {
-				Block b = new Location(main.getDungeonWorld(), x * PLOT_SIZE, 80, z * PLOT_SIZE).getBlock();
-				if(b.getType() == Material.AIR) {
-					plotX = x;
-					plotZ = z;
-					break;
-				}
-			}
-		}
-		if(plotX == -1 || plotZ == -1) {
-			System.err.println("ERROR: Failed to find plot location");
-			return null;
+		
+	public List<File> selectRoomType(RoomData parentRoom, int roomNumber) {
+		GeneratorSettings settings = generator.getSettings();
+		DungeonTheme theme = main.getThemeManager().getTheme(settings.getTheme());
+		
+		if(roomNumber == 0) return theme.getStructures(StructureType.START_ROOM);
+		if(generator.getChestRoomCount() == settings.getRoomLimit()) return theme.getStructures(StructureType.BOSS_ROOM);
+		
+		StructureType[] initialPattern = new StructureType[] {StructureType.LARGE_ROOM, StructureType.SMALL_ROOM, StructureType.HALLWAY};
+		if(parentRoom.getDistance() < initialPattern.length) {
+			return theme.getStructures(initialPattern[parentRoom.getDistance()]);
 		} else {
-			return new Vector3(plotX*PLOT_SIZE, 80, plotZ*PLOT_SIZE);
+			StructureType[] pattern = new StructureType[] {StructureType.SMALL_ROOM, StructureType.LARGE_ROOM, StructureType.SMALL_ROOM, StructureType.HALLWAY};
+			int dist = parentRoom.getDistance() - initialPattern.length;
+			dist = dist % pattern.length;
+			return theme.getStructures(pattern[dist]);
 		}
+		  
+	}
+	
+	public File selectRoomFile(RoomData parentRoom, int roomNumber) {
+		List<File> options = selectRoomType(parentRoom, roomNumber);
+		if(options.isEmpty()) {
+			main.getLogger().severe("DungeonGeneratorUtils#selectRoomFile() Room options is empty! (parentType: " + parentRoom.getType() + ", roomNumber: " + roomNumber + ")");
+			return null;
+		}
+		
+		// Count the amount of instances for each type of room in the dungeon
+		HashMap<File, Integer> instances = generator.getInstances();				
+		WeightedList<File> list = new WeightedList<File>();
+		for(File option : options) {
+			int amt = 0;
+			if(instances.containsKey(option)) amt = instances.get(option);
+			list.addValue(option, weightFunction(amt));
+		}
+		
+		return options.get(generator.rand.nextInt(options.size()));
 	}
 	
 	public int getFurthestDistance() {
@@ -74,6 +86,16 @@ public class DungeonGeneratorUtils {
 			}
 		}
 		return largest;
+	}
+	
+	private int weightFunction(int amtOfInstances) {
+		if(amtOfInstances == 0) {
+			return 100;
+		} else if(amtOfInstances <= 3) {
+			return -5*amtOfInstances + 30;
+		} else {
+			return (int) Math.max(-0.5*amtOfInstances+16.5, 3);
+		}
 	}
 	
 }

@@ -26,13 +26,6 @@ import com.mullen.ethan.dungeonrunner.startwell.QueueRoom;
 import com.mullen.ethan.dungeonrunner.startwell.StartWell;
 import com.mullen.ethan.dungeonrunner.teleporter.TeleporterManager;
 
-/*
- * DungeonRunner TODO:
- * - Teleporters:
- *    - Air cloud, like return teleporter in queueroom
- *    - Has a custom name, top row: ChatColor.AQUA + "Teleporter" bottom row: ChatColor.GRAY + "<Destination>"
- *    - Dungeon boss room has a to-start teleporter, dungeon start room has an exit teleporter
- */
 // Thanks https://github.com/Shynixn/StructureBlockLib
 public class Main extends JavaPlugin {
 	

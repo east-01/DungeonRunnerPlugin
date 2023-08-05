@@ -253,7 +253,8 @@ public class LootTableManager {
 		typedTables.get(LootType.BOSS_MINOR_LOOT)[0].addEntry("DUNGEON_MATERIAL", 5, 1, 4);
 		typedTables.get(LootType.BOSS_MINOR_LOOT)[0].addEntry(Material.ANCIENT_DEBRIS, 1, 1, 2);
 		typedTables.get(LootType.BOSS_MINOR_LOOT)[0].addEntry(Material.SHULKER_SHELL, 1);
-
+		typedTables.get(LootType.BOSS_MINOR_LOOT)[0].addEntry(IncludedMobsRegister.CI_MINERS_LANTERN, 5);
+		
 		typedTables.get(LootType.BOSS_MAJOR_LOOT)[0].addEntry(Material.DIAMOND_SWORD, 10);
 		typedTables.get(LootType.BOSS_MAJOR_LOOT)[0].addEntry(Material.DIAMOND_PICKAXE, 10);
 		typedTables.get(LootType.BOSS_MAJOR_LOOT)[0].addEntry(Material.DIAMOND_SHOVEL, 10);
@@ -276,10 +277,12 @@ public class LootTableManager {
 		typedTables.get(LootType.BOSS_MAJOR_LOOT)[1].addEntry(createMaxEnchantBook(Enchantment.DURABILITY), 5);
 		typedTables.get(LootType.BOSS_MAJOR_LOOT)[1].addEntry(createMaxEnchantBook(Enchantment.DAMAGE_ALL), 5);
 		typedTables.get(LootType.BOSS_MAJOR_LOOT)[1].addEntry(createMaxEnchantBook(Enchantment.PROTECTION_ENVIRONMENTAL), 5);
+		typedTables.get(LootType.BOSS_MAJOR_LOOT)[1].addEntry(IncludedMobsRegister.CI_TREEFELLING_AXE, 1);
 		
 		typedTables.get(LootType.BOSS_MAJOR_LOOT)[2].addEntry(IncludedMobsRegister.CI_EXPLOSIVE_PICK, 1);
 		typedTables.get(LootType.BOSS_MAJOR_LOOT)[2].addEntry(IncludedMobsRegister.CI_SMELTERS_PICK, 1);
-		
+		typedTables.get(LootType.BOSS_MAJOR_LOOT)[2].addEntry(IncludedMobsRegister.CI_TREEFELLING_AXE, 2);
+		typedTables.get(LootType.BOSS_MAJOR_LOOT)[2].addEntry(IncludedMobsRegister.CI_TELEPORTER_CRYSTAL, 2);		
 	}
 	
 	public static ItemStack createSplashPotion(PotionType type) {
